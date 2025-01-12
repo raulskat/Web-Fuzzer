@@ -1,0 +1,4 @@
+/api/v1/users
+/admin
+/login
+/logout

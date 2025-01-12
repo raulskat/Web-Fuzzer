@@ -1,0 +1,30 @@
+{
+    "target_url": "http://github.com",  
+    "target_domain": "github.com",  
+    "directories": {
+      "enabled": true,                 
+      "wordlist": "src/wordlists/directory_wordlist.txt" 
+    },
+    "subdomains": {
+      "enabled": true,                 
+      "wordlist": "src/wordlists/subdomain_wordlist.txt" 
+    },
+    "api_endpoints": {
+      "enabled": true,                
+      "wordlist": "src/wordlists/api_endpoints.txt" 
+    },
+    "request_options": {
+      "method": "GET",                 
+      "timeout": 10,                   
+      "retries": 3                     
+    },
+    "rate_limiting": {
+      "enabled": true,                 
+      "requests_per_second": 5         
+    },
+    "logging": {
+      "enabled": true,                 
+      "log_file": "fuzzer_log.log"     
+    }
+  }
+  
