@@ -14,16 +14,19 @@ A Python-based web application fuzzing framework designed for security testing o
    ```bash
    git clone https://github.com/yourusername/web-fuzzer.git
    cd web-fuzzer
+   ```
 
 2. Install dependencies:
    ```bash
     pip install -r requirements.txt
+   ```
 
 3. Optional: Set up a virtual environment for Python (recommended for isolating dependencies):
-   ```python
+   ```bash
      python -m venv venv
      source venv/bin/activate   # For Linux/Mac
      venv\Scripts\activate      # For Windows
+   ```
 
 ## Usage Instructions
 
@@ -31,20 +34,32 @@ A Python-based web application fuzzing framework designed for security testing o
    - Navigate to the `config/` directory.
    - Open and modify the `default_config.json` file with your desired settings.
    - Example configuration:
-     ```json
+      ```json
      {
        "base_url": "https://example.com",
        "wordlist": "path/to/wordlist.txt",
        "timeout": 10
      }
-     ```
+      ```
 
 2. **Run the Desired Fuzzing Module:**
    Execute the following command to run the fuzzing module of your choice.
 
    - For **Directory Fuzzing**:
      ```bash
-     python src/fuzzing/directories.py
+     python -m src.fuzzing.directories
+     ```
+   - For **SubDomain Fuzzing**:
+     ```bash
+     python -m src.fuzzing.subdomains 
+     ```
+   - For **API EndPoints Fuzzing**:
+     ```bash
+     python -m src.fuzzing.api_endpoints
+     ```
+   - For **testing** all:
+     ```bash
+     python -m tests.test_fuzzing
      ```
 
 ## Contributing
