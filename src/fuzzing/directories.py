@@ -1,10 +1,16 @@
 # src/fuzzing/directories.py
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from src.utils.logger import setup_logger
 from src.utils.request_handler import RequestHandler
 from src.utils.config_loader import load_config
+import cohere
+import os
+from dotenv import load_dotenv
+import cohere
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Load the configuration
 config = load_config()
@@ -15,15 +21,34 @@ if config['directories']['enabled']:
     print("Directory fuzzing enabled!")
 
 class DirectoryFuzzer:
-    def __init__(self, base_url, wordlist, threads=5, delay=0.5,log_file="directory_fuzzer.log"):
+    def __init__(self, base_url, wordlist, threads=5, delay=0.5):
         self.base_url = base_url
         self.wordlist = wordlist  # Accept wordlist directly as an argument
         self.request_handler = RequestHandler()
         self.threads = threads
         self.delay = delay
         self.logger = setup_logger("directory_fuzzer",config["logging"]["log_file"])
-        self.logger = setup_logger("directory_fuzzer",log_file)
     
+    def generate_wordlist_with_ai(self, prompt, max_tokens=100):
+        """Generate a wordlist using Cohere's language model."""
+        cohere_api_key = os.getenv('COHERE_API_KEY')
+        if not cohere_api_key:
+            self.logger.error("Cohere API key not found in environment variables.")
+            return []
+        co = cohere.Client(cohere_api_key)
+        response = co.generate(
+            model='command-r-plus',
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temperature=0.7,
+            k=1,
+            stop_sequences=["\n"]
+        )
+        wordlist = response.generations[0].text.strip().split(',')
+        wordlist=[word.strip() for word in wordlist if word.strip()]
+        print(wordlist)
+        return wordlist
+
     def load_wordlist(self):
         """Return the wordlist directly (since you're passing it directly)."""
         return self.wordlist  # Just return the wordlist passed in the constructor
@@ -62,16 +87,24 @@ class DirectoryFuzzer:
     def fuzz_directories(self):
     # """Perform directory fuzzing with parallel processing."""
         if config['directories']['enabled']:
-            wordlist = self.load_wordlist()
-            if not wordlist:
-                self.logger.error("Wordlist is empty or could not be loaded.")
+            # Generate wordlist using AI
+            prompt = f"just give the list of common directories for a website like {self.base_url} in the form of only those diresctories name and should only contain name (not even space or -)"
+            ai_wordlist = self.generate_wordlist_with_ai(prompt)
+            if not ai_wordlist:
+                self.logger.error("AI-generated wordlist is empty.")
                 return []
+            # wordlist from filepath
+            existing_wordlist = self.load_wordlist()
+            if not existing_wordlist:
+                self.logger.error("existing_Wordlist is empty or could not be loaded.")
+                return []
+            combined_wordlist = list(set(existing_wordlist + ai_wordlist))
 
             self.logger.info(f"Starting directory fuzzing on {self.base_url}")
             results = []
 
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
-                future_to_path = {executor.submit(self.test_directory, path): path for path in wordlist}
+                future_to_path = {executor.submit(self.test_directory, path): path for path in combined_wordlist}
                 for future in as_completed(future_to_path):
                     path = future_to_path[future]
                     try:
@@ -82,7 +115,7 @@ class DirectoryFuzzer:
                         self.logger.error(f"Error while processing path '{path}': {str(e)}")
                     time.sleep(self.delay)
 
-            self.logger.info(f"Fuzzing completed. Total paths tested: {len(wordlist)}.")
+            self.logger.info(f"Fuzzing completed. Total paths tested: {len(combined_wordlist)}.")
             return results
         else:
             print("disabled directories in config")

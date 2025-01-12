@@ -12,7 +12,7 @@ A Python-based web application fuzzing framework designed for security testing o
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/web-fuzzer.git
+   git clone https://github.com/raulskat/Web-Fuzzer.git
    cd web-fuzzer
    ```
 
