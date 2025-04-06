@@ -1,0 +1,500 @@
+/* 
+ * API Endpoints Fuzzing Page Styles
+ * Colorful, bright styling for API endpoint fuzzing functionality
+ */
+
+/* API Configuration Form Section */
+.api-config-section {
+  background-color: var(--light);
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.api-config-section h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.api-config-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.api-config-form .form-group.full-width {
+  grid-column: 1 / 3;
+}
+
+.api-config-form .auth-section {
+  border-top: 1px solid var(--light-gray);
+  padding-top: 1rem;
+  margin-top: 1rem;
+  grid-column: 1 / 3;
+}
+
+/* Method Selection Buttons */
+.method-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.method-btn {
+  background-color: var(--light-gray);
+  color: var(--dark);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.method-btn:hover {
+  background-color: var(--secondary-color-light);
+  color: var(--dark);
+}
+
+.method-btn.active {
+  background-color: var(--success-color);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.method-btn.get.active { background-color: var(--primary-color); }
+.method-btn.post.active { background-color: var(--success-color); }
+.method-btn.put.active { background-color: var(--warning-color); }
+.method-btn.delete.active { background-color: var(--danger-color); }
+
+/* Endpoint Testing Section */
+.endpoint-testing {
+  background-color: var(--light);
+  border: 1px solid var(--accent-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.endpoint-testing h3 {
+  color: var(--accent-color);
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.endpoint-url {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.endpoint-url .input-group-text {
+  background-color: var(--primary-color-light);
+  color: var(--primary-color);
+  border-color: var(--light-gray);
+  padding: 0.5rem 1rem;
+}
+
+.endpoint-params {
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.param-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  align-items: center;
+}
+
+.param-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-add-param {
+  color: var(--success-color);
+  background-color: transparent;
+  border: 1px solid var(--success-color);
+  padding: 0.4rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-add-param:hover {
+  background-color: var(--success-color-light);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-remove-param {
+  color: var(--danger-color);
+  background-color: transparent;
+  border: none;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-param:hover {
+  color: var(--danger-color-dark);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Results Visualization Section */
+.results-section {
+  background-color: var(--light);
+  border: 1px solid var(--secondary-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.results-section h3 {
+  color: var(--secondary-color);
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.results-container {
+  height: 500px;
+  overflow-y: auto;
+}
+
+.results-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--light-gray);
+  margin-bottom: 1.5rem;
+}
+
+.results-tab {
+  background-color: transparent;
+  color: var(--dark);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  position: relative;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.results-tab:hover {
+  color: var(--primary-color);
+}
+
+.results-tab.active {
+  color: var(--secondary-color);
+}
+
+.results-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--secondary-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.result-card {
+  background-color: var(--dark-tertiary);
+  border-left: 4px solid var(--neon-blue);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.result-card:hover {
+  transform: translateX(2px);
+  box-shadow: 0 0 12px rgba(0, 195, 255, 0.15);
+}
+
+.result-card.success {
+  border-left-color: var(--neon-green);
+}
+
+.result-card.error {
+  border-left-color: var(--neon-red);
+}
+
+.result-card.warning {
+  border-left-color: var(--neon-orange);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.result-status {
+  font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.result-status.success {
+  background-color: rgba(80, 250, 123, 0.15);
+  color: var(--neon-green);
+}
+
+.result-status.error {
+  background-color: rgba(255, 96, 92, 0.15);
+  color: var(--neon-red);
+}
+
+.result-status.warning {
+  background-color: rgba(255, 184, 108, 0.15);
+  color: var(--neon-orange);
+}
+
+.result-endpoint {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: var(--neon-blue);
+  word-break: break-all;
+}
+
+.result-details {
+  background-color: var(--dark-primary);
+  border-radius: 3px;
+  padding: 0.75rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.json-view {
+  color: var(--light-gray);
+}
+
+.json-key {
+  color: var(--neon-purple);
+}
+
+.json-string {
+  color: var(--neon-green);
+}
+
+.json-number {
+  color: var(--neon-blue);
+}
+
+.json-boolean {
+  color: var(--neon-orange);
+}
+
+.json-null {
+  color: var(--light-gray);
+  font-style: italic;
+}
+
+/* Progress and stats visualization */
+.api-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background-color: var(--dark-tertiary);
+  border-radius: 4px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-card.total .stat-value { color: var(--neon-cyan); }
+.stat-card.success .stat-value { color: var(--neon-green); }
+.stat-card.errors .stat-value { color: var(--neon-red); }
+.stat-card.warnings .stat-value { color: var(--neon-orange); }
+
+.stat-label {
+  color: var(--light-gray);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Progress bar styling */
+.fuzzing-progress {
+  margin: 1.5rem 0;
+}
+
+.progress {
+  height: 10px;
+  background-color: var(--dark-tertiary);
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 5px;
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 25%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 75%
+  );
+  animation: shimmer 2s infinite;
+  transform: translateX(-100%);
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Request payload editor */
+.payload-editor {
+  margin-bottom: 1.5rem;
+}
+
+.payload-editor .nav-tabs {
+  border-bottom-color: var(--dark-tertiary);
+}
+
+.payload-editor .nav-link {
+  color: var(--light-gray);
+  border: none;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+}
+
+.payload-editor .nav-link:hover {
+  color: var(--light);
+}
+
+.payload-editor .nav-link.active {
+  color: var(--neon-blue);
+  background-color: transparent;
+  border-bottom: 2px solid var(--neon-blue);
+}
+
+.payload-editor .tab-content {
+  background-color: var(--dark-tertiary);
+  border-radius: 0 0 4px 4px;
+  padding: 1rem;
+}
+
+.code-editor {
+  font-family: 'Courier New', monospace;
+  background-color: var(--dark-primary);
+  color: var(--light);
+  border: none;
+  border-radius: 3px;
+  padding: 0.75rem;
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+}
+
+/* Running animation */
+.fuzzing-running {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 1rem;
+  font-size: 0.9rem;
+  color: var(--neon-blue);
+}
+
+.fuzzing-running .loading-dots {
+  display: inline-flex;
+  margin-left: 0.5rem;
+}
+
+.fuzzing-running .dot {
+  width: 6px;
+  height: 6px;
+  margin: 0 2px;
+  background-color: var(--neon-blue);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.fuzzing-running .dot:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.fuzzing-running .dot:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(0.75);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .api-config-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .api-config-form .form-group.full-width {
+    grid-column: 1;
+  }
+  
+  .api-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .param-item {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .param-controls {
+    grid-column: span 2;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 576px) {
+

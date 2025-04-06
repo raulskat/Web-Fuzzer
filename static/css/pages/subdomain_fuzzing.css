@@ -1,0 +1,248 @@
+/* 
+ * Subdomain Fuzzing Page Styles
+ * Specific styles for the subdomain fuzzing functionality
+ * Following the colorful theme (bright backgrounds with vibrant colors)
+ */
+
+/* Main container for the subdomain fuzzing page */
+.subdomain-fuzzing-container {
+    background-color: var(--light-bg);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
+}
+
+/* Section headers */
+.subdomain-fuzzing-container h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.25rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+/* Form container styling */
+.subdomain-form {
+    background-color: var(--lighter-bg);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-light);
+}
+
+/* Domain input field styling */
+.domain-input {
+    background-color: var(--white);
+    border: 1px solid var(--border-input);
+    color: var(--text-dark);
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.domain-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+    outline: none;
+}
+
+/* Input label styling */
+.input-label {
+    color: var(--text-medium);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    display: block;
+}
+
+/* Wordlist selection styling */
+.wordlist-selection {
+    margin-top: 1.25rem;
+}
+
+.wordlist-option {
+    background-color: var(--white);
+    border: 1px solid var(--border-input);
+    color: var(--text-dark);
+    border-radius: 4px;
+    padding: 0.5rem;
+    transition: all 0.25s ease;
+}
+
+.wordlist-option:hover, .wordlist-option:focus {
+    border-color: var(--secondary-color);
+}
+
+.wordlist-option:checked + label {
+    color: var(--secondary-color);
+}
+
+/* Submit button styling */
+.fuzzing-submit-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1.5rem;
+}
+
+.fuzzing-submit-btn:hover {
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+}
+
+.fuzzing-submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Results display container */
+.results-container {
+    background-color: var(--lighter-bg);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-left: 3px solid var(--accent-color);
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.results-title {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Results list styling */
+.subdomain-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 1rem;
+}
+
+.subdomain-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.subdomain-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.subdomain-item:last-child {
+    border-bottom: none;
+}
+
+.subdomain-url {
+    color: var(--text-dark);
+    font-family: 'Courier New', monospace;
+}
+
+.subdomain-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background-color: rgba(var(--success-rgb), 0.2);
+    color: var(--success-color);
+}
+
+.status-inactive {
+    background-color: rgba(var(--danger-rgb), 0.2);
+    color: var(--danger-color);
+}
+
+/* Progress indicator */
+.fuzzing-progress {
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--progress-bg);
+    margin: 1.5rem 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+/* Copy button for results */
+.copy-btn {
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.3rem 0.75rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:
+
+/* Export options */
+.export-options {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.export-btn {
+    background-color: var(--darkest-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-dark);
+    padding: 0.4rem 0.75rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .subdomain-fuzzing-container {
+        padding: 1rem;
+    }
+    
+    .fuzzing-submit-btn {
+        width: 100%;
+    }
+    
+    .subdomain-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .subdomain-status {
+        margin-top: 0.5rem;
+    }
+}
+

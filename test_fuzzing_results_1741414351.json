@@ -1,0 +1,30 @@
+{
+    "directories": [
+        "https://httpbin.org/js",
+        "https://httpbin.org/ping",
+        "https://httpbin.org/status",
+        "https://httpbin.org/about",
+        "https://httpbin.org/docs",
+        "https://httpbin.org/css",
+        "https://httpbin.org/admin",
+        "https://httpbin.org/data",
+        "https://httpbin.org/upload",
+        "https://httpbin.org/test",
+        "https://httpbin.org/login",
+        "https://httpbin.org/api",
+        "https://httpbin.org/assets",
+        "https://httpbin.org/config",
+        "https://httpbin.org/images",
+        "https://httpbin.org/user",
+        "https://httpbin.org/sitemap.xml",
+        "https://httpbin.org/robots.txt",
+        "https://httpbin.org/health",
+        "https://httpbin.org/static"
+    ],
+    "subdomains": [],
+    "api_endpoints": [],
+    "meta": {
+        "timestamp": "2025-03-08 11:42:31",
+        "tool": "Web Application Fuzzer"
+    }
+}

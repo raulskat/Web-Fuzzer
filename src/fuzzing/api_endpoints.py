@@ -31,24 +31,24 @@ class ApiFuzzer:
         if response is None:
             self.logger.warning(f"No response for {method} on {url}")
             return
-        if response.status_code == 404:
+        if response['status'] == 404:
             self.logger.info(f"Path not found for {method} on {url}")
             return url, method, "not_found"
-        elif 300 <= response.status_code < 400:
+        elif 300 <= response['status'] < 400:
             self.logger.info(f"Redirection detected: {url}")
             return url, "redirect"
 
-        elif response.status_code == 200:
+        elif response['status'] == 200:
             self.logger.info(f"Valid path found for {method} on {url}")
             return url, method, "valid"
-        elif response.status_code == 403:
+        elif response['status'] == 403:
             self.logger.info(f"Access forbidden for {method} on {url}")
             return url, method, "forbidden"
-        elif response.status_code == 500:
+        elif response['status'] == 500:
             self.logger.info(f"Server error for {method} on {url}")
             return url, method, "server_error"
         else:
-            self.logger.info(f"Unexpected status code {response.status_code} for {method} on {url}")
+            self.logger.info(f"Unexpected status code {response['status']} for {method} on {url}")
             return url, method, "unexpected"
 
     def test_endpoint(self, url, method):
@@ -107,6 +107,7 @@ if __name__ == "__main__":
             endpoints = [line.strip() for line in file]
 
         fuzzer = ApiFuzzer(base_url, endpoints)
+        print(f"{base_url}")
         discovered = fuzzer.fuzz_api_endpoints()
         print(f"Discovered API responses:{discovered}")
         for url, method, status in discovered:

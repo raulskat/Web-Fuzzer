@@ -1,0 +1,9 @@
+{
+    "directories": [],
+    "subdomains": [],
+    "api_endpoints": [],
+    "meta": {
+        "timestamp": "2025-03-08 11:28:56",
+        "tool": "Web Application Fuzzer"
+    }
+}

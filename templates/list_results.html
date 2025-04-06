@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Results</title>
+</head>
+<body>
+<h1>Results</h1>
+{% if results_files %}
+<table border='1'>
+<tr>
+<th>File</th>
+<th>Type</th>
+<th>Date</th>
+<th>Actions</th>
+</tr>
+{% for file in results_files %}
+<tr>
+<td>{{ file.filename }}</td>
+<td>{{ file.fuzz_type }}</td>
+<td>{{ file.timestamp }}</td>
+<td>
+<a href='{{ url_for("results", filename=file.filename) }}'>View</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No results found</p>
+{% endif %}
+<p><a href='{{ url_for("index") }}'>Home</a></p>
+</body>
+</html>

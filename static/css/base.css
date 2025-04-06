@@ -1,0 +1,233 @@
+/* 
+ * Base.css - Foundation styles for Web-Fuzzer application
+ * Cybersecurity theme with dark background and neon accents
+ */
+
+:root {
+  /* Core color palette - Cybersecurity theme */
+  --bg-primary: #050510;
+  --bg-secondary: #0c0c1d;
+  --bg-tertiary: #13132b;
+  
+  /* Neon accent colors */
+  --neon-green: #00ffaa;
+  --neon-blue: #00b8ff;
+  --neon-purple: #ff00dd;
+  --neon-pink: #ff3a5e;
+  
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #d0d0e0;
+  --text-muted: #8888a0;
+  
+  /* Status colors */
+  --status-success: #00ff9d;
+  --status-redirect: #ffb700;
+  --status-error: #ff4545;
+  --status-server-error: #ff0053;
+  
+  /* Shadows and effects */
+  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+  
+  --glow-green: 0 0 10px rgba(0, 255, 170, 0.5);
+  --glow-blue: 0 0 10px rgba(0, 184, 255, 0.5);
+  --glow-purple: 0 0 10px rgba(255, 0, 221, 0.5);
+  --glow-pink: 0 0 10px rgba(255, 58, 94, 0.5);
+  
+  /* Spacing system */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-xxl: 3rem;
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  /* Typography */
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-sans: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Outfit', 'Segoe UI', Roboto, sans-serif;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-xxl: 2rem;
+  --font-size-xxxl: 3rem;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+  
+  /* Layout */
+  --header-height: 60px;
+  --sidebar-width: 250px;
+  --container-width: 1200px;
+  --z-header: 100;
+  --z-modal: 200;
+  --z-tooltip: 300;
+}
+
+/* Reset & Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Grid background pattern */
+body {
+  background-image: 
+    linear-gradient(rgba(0, 184, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 184, 255, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--space-md);
+}
+
+h1 {
+  font-size: var(--font-size-xxxl);
+  background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(0, 184, 255, 0.3);
+}
+
+h2 {
+  font-size: var(--font-size-xxl);
+  color: var(--text-primary);
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+}
+
+h4 {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+p {
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--neon-blue);
+  text-decoration: none;
+  transition: color var(--transition-fast), text-shadow var(--transition-fast);
+}
+
+a:hover, a:focus {
+  color: var(--neon-purple);
+  text-shadow: var(--glow-blue);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+code {
+  padding: 0.2em 0.4em;
+}
+
+pre {
+  padding: var(--space-md);
+  overflow-x: auto;
+  margin-bottom: var(--space-md);
+}
+
+/* Form elements - Basic styling */
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+input, select, textarea {
+  background-color: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 0 3px rgba(0, 184, 255, 0.1);
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Utility classes */
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+  :root {
+    --font-size-xxxl: 2.25rem;
+    --font-size-xxl: 1.75rem;
+    --space-xxl: 2rem;
+  }
+  
+  .container {
+    padding: 0 var(--space-sm);
+  }
+}
+

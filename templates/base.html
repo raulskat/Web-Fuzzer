@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-Fuzzer - {% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Web-Fuzzer</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>Home</a></li>
+                    <li><a href="{{ url_for('directory_fuzzing') }}" {% if request.endpoint == 'directory_fuzzing' %}class="active"{% endif %}>Directory Fuzzing</a></li>
+                    <li><a href="{{ url_for('subdomain_fuzzing') }}" {% if request.endpoint == 'subdomain_fuzzing' %}class="active"{% endif %}>Subdomain Fuzzing</a></li>
+                    <li><a href="{{ url_for('api_endpoints_fuzzing') }}" {% if request.endpoint == 'api_endpoints_fuzzing' %}class="active"{% endif %}>API Endpoint Fuzzing</a></li>
+                    <li><a href="{{ url_for('results_list') }}" {% if request.endpoint == 'results_list' %}class="active"{% endif %}>Results</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Web-Fuzzer. A web fuzzing tool for security testing.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

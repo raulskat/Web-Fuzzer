@@ -1,6 +1,8 @@
 # src/fuzzing/subdomains.py
 import dns.resolver
+import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 from src.utils.logger import setup_logger
 from src.utils.config_loader import load_config
 
@@ -25,15 +27,30 @@ class SubdomainFuzzer:
         """Process the DNS response and log results."""
         if response is None:
             self.logger.warning(f"No response for subdomain: {fqdn}")
-            return
-        if response.status_code == 200:
-            self.logger.info(f"Valid subdomain found: {fqdn}: {response.status_code}")
-        elif response.status_code == 403:
-            self.logger.info(f"Access forbidden to subdomain: {fqdn}: {response.status_code}")
-        elif response.status_code == 500:
-            self.logger.info(f"Server error for subdomain: {fqdn}: {response.status_code}")
+            return {"url": fqdn, "status": 503, "size": 0, "response_time": 0, "content_type": "N/A", "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+        
+        if isinstance(response, bool):
+            # DNS resolution was successful
+            self.logger.info(f"Valid subdomain found: {fqdn}")
+            return {
+                "url": fqdn,
+                "status": 200,  # DNS resolution successful
+                "size": 0,
+                "response_time": 0,
+                "content_type": "DNS Record",
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
         else:
-            self.logger.info(f"Unexpected response for subdomain {fqdn}: {response.status_code}")
+            # Response has a status code
+            self.logger.info(f"Response for subdomain {fqdn}: {response.status_code}")
+            return {
+                "url": fqdn,
+                "status": response.status_code,
+                "size": len(response.content) if hasattr(response, 'content') else 0,
+                "response_time": 0,
+                "content_type": response.headers.get('Content-Type', 'N/A') if hasattr(response, 'headers') else 'N/A',
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
 
     def test_subdomain(self, subdomain):
         """Resolve a subdomain and process the response."""
@@ -41,71 +58,135 @@ class SubdomainFuzzer:
         try:
             # Resolve the subdomain DNS records
             dns.resolver.resolve(fqdn, 'A')  # 'A' record for IPv4 addresses
-            response = True  # Simulating a successful DNS resolution response
-            self.process_response(fqdn, response)  # Process the DNS response
-            self.discovered_subdomains.append(fqdn)
+            response = True  # Successful DNS resolution response
+            result = self.process_response(fqdn, response)  # Get processed response
+            self.discovered_subdomains.append(result)
+            return result
         except dns.resolver.NoAnswer:
             self.logger.warning(f"No DNS record found for subdomain: {fqdn}")
+            return self.process_response(fqdn, None)
         except dns.resolver.NXDOMAIN:
             self.logger.warning(f"Subdomain does not exist: {fqdn}")
+            return self.process_response(fqdn, None)
         except Exception as e:
             self.logger.error(f"Error while resolving {fqdn}: {str(e)}")
+            return self.process_response(fqdn, None)
 
 
     def resolve_subdomain(self, subdomain):
         """
-        Attempt to resolve a subdomain.
+        Attempt to resolve a subdomain and check its HTTP availability.
 
         Args:
             subdomain (str): The subdomain to resolve.
 
         Returns:
-            tuple: A tuple (subdomain, status) where `status` is either
-                   "discovered", "no_record", "nonexistent", or "error".
+            dict: A dictionary containing the subdomain's status and response information.
         """
         fqdn = f"{subdomain}.{self.domain}"
         try:
-            dns.resolver.resolve(fqdn, 'A')  # Attempt DNS resolution
-            self.logger.info(f"Discovered subdomain: {fqdn}")
-            return fqdn, "discovered"
+            # First attempt DNS resolution
+            dns.resolver.resolve(fqdn, 'A')
+            
+            # If DNS resolution succeeds, try HTTP request
+            url = f"https://{fqdn}"
+            start_time = datetime.now()
+            try:
+                import requests
+                response = requests.get(url, timeout=5, allow_redirects=False)
+                response_time = (datetime.now() - start_time).total_seconds() * 1000
+                
+                return {
+                    "url": url,
+                    "status": response.status_code,
+                    "size": len(response.content),
+                    "response_time": int(response_time),
+                    "content_type": response.headers.get('Content-Type', 'N/A'),
+                    "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                }
+            except requests.RequestException:
+                # HTTP request failed but DNS resolved
+                self.logger.info(f"DNS resolved but HTTP failed for: {fqdn}")
+                return {
+                    "url": url,
+                    "status": 200,  # DNS resolved but HTTP failed
+                    "size": 0,
+                    "response_time": 0,
+                    "content_type": "DNS Only",
+                    "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                }
+                
         except dns.resolver.NoAnswer:
             self.logger.warning(f"No DNS record found for: {fqdn}")
-            return fqdn, "no_record"
+            return {
+                "url": f"https://{fqdn}",
+                "status": 404,
+                "size": 0,
+                "response_time": 0,
+                "content_type": "N/A",
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
         except dns.resolver.NXDOMAIN:
             self.logger.warning(f"Domain does not exist: {fqdn}")
-            return fqdn, "nonexistent"
+            return {
+                "url": f"https://{fqdn}",
+                "status": 404,
+                "size": 0,
+                "response_time": 0,
+                "content_type": "N/A",
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
         except Exception as e:
             self.logger.error(f"Error while resolving {fqdn}: {str(e)}")
-            return fqdn, "error"
+            return {
+                "url": f"https://{fqdn}",
+                "status": 500,
+                "size": 0,
+                "response_time": 0,
+                "content_type": "N/A",
+                "error": str(e),
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
 
     def fuzz_subdomains(self):
         """
         Perform subdomain discovery using the provided wordlist.
         
         Returns:
-            list: A list of successfully discovered subdomains.
+            list: A list of discovered subdomains with their status information.
         """
         if config['subdomains']['enabled']:
             self.logger.info(f"Starting subdomain fuzzing on domain: {self.domain}")
-            discovered_subdomains = []
+            results = []
 
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
                 future_to_subdomain = {
-                    executor.submit(self.resolve_subdomain, subdomain): subdomain for subdomain in self.wordlist
+                    executor.submit(self.resolve_subdomain, subdomain): subdomain 
+                    for subdomain in self.wordlist
                 }
                 for future in as_completed(future_to_subdomain):
                     subdomain = future_to_subdomain[future]
                     try:
-                        fqdn, status = future.result()
-                        if status == "discovered":
-                            discovered_subdomains.append(fqdn)
+                        result = future.result()
+                        results.append(result)
                     except Exception as e:
                         self.logger.error(f"Error while processing subdomain '{subdomain}': {str(e)}")
+                        # Add error result
+                        results.append({
+                            "url": f"https://{subdomain}.{self.domain}",
+                            "status": 500,
+                            "size": 0,
+                            "response_time": 0,
+                            "content_type": "N/A",
+                            "error": str(e),
+                            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        })
 
-            self.logger.info(f"Fuzzing completed. Total discovered subdomains: {len(discovered_subdomains)}")
-            return discovered_subdomains
+            self.logger.info(f"Fuzzing completed. Total processed subdomains: {len(results)}")
+            return results
         else:
             print("disabled subdomains in config")
+            return []
 
 
 # Example usage

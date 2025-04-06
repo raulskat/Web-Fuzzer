@@ -1,0 +1,223 @@
+/* Modern Cybersecurity Theme with Refined Color Palette */
+:root {
+  /* Core palette */
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #3e3030;
+  --text-secondary: #2a1515;
+  
+  /* Accent colors */
+  --neon-green: #26c485;
+  --neon-blue: #4a90e2;
+  --neon-purple: #9966cc;
+  --neon-pink: #f06292;
+  
+  /* Status code colors */
+  --status-success: #26c485;
+  --status-redirect: #ffca28;
+  --status-client-error: #ef5350;
+  --status-server-error: #ab47bc;
+  
+  /* Shadows and highlights */
+  --shadow-soft: 0 4px 12px rgba(230, 20, 20, 0.891);
+  --shadow-neon-green: 0 0 15px rgba(19, 252, 159, 0.919);
+  --shadow-neon-blue: 0 0 15px rgba(120, 166, 219, 0.906);
+  --shadow-neon-purple: 0 0 15px rgba(125, 18, 233, 0.848);
+  --shadow-neon-pink: 0 0 15px rgba(230, 25, 93, 0.881);
+  
+  /* Glass effect variables */
+  --glass-bg: rgba(103, 67, 67, 0.8);
+  --glass-border: rgba(230, 8, 8, 0.7);
+  --glass-highlight: rgba(237, 106, 106, 0.9);
+}
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 0;
+}
+
+/* Header */
+header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+header .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #333, var(--neon-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navigation */
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+  color: var(--neon-blue);
+}
+
+nav ul li a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--neon-blue);
+  transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after,
+nav ul li a.active::after {
+  width: 100%;
+}
+
+/* Main Content */
+main {
+  padding: 2rem 0;
+}
+
+/* Fuzzer Section */
+.fuzzer-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.fuzzer-section h2 {
+  font-size: 2rem;
+  color: var(--neon-blue);
+  margin-bottom: 1rem;
+}
+
+.fuzzer-section p {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* Card Container */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Card Hover Effect */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--glass-border), 0 0 0 4px var(--shadow-neon-blue);
+}
+
+/* Card Headings */
+.card h3 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+/* Card Paragraphs */
+.card p {
+  flex-grow: 1;
+  color: var(--text-secondary);
+}
+
+/* Button Styles */
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--neon-blue);
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--neon-green);
+  transform: scale(1.02);
+}
+
+/* Footer */
+footer {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem 0;
+  text-align: center;
+}
+
+footer p {
+  color: var(--text-secondary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+}

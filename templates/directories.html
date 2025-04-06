@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory Fuzzing - Web Fuzzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Web Fuzzer</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('directories') }}" class="active">Directory Fuzzing</a></li>
+                    <li><a href="{{ url_for('subdomains') }}">Subdomain Fuzzing</a></li>
+                    <li><a href="{{ url_for('api_endpoints') }}">API Endpoint Fuzzing</a></li>
+                    <li><a href="{{ url_for('parameters') }}">Parameter Fuzzing</a></li>
+                    <li><a href="{{ url_for('virtual_hosts') }}">Virtual Host Fuzzing</a></li>
+                    <li><a href="{{ url_for('list_results') }}">Results</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="fuzzer-section">
+            <h2>Directory Fuzzing</h2>
+            <p>Directory fuzzing helps discover hidden directories and files on a web server by systematically testing different path combinations.</p>
+            
+            <div class="card">
+                <form method="POST" action="{{ url_for('directories') }}">
+                    {{ form.csrf_token }}
+                    
+                    <div class="form-group">
+                        {{ form.target_url.label(class="form-label") }}
+                        {{ form.target_url(class="form-control", placeholder="https://example.com") }}
+                        {% if form.target_url.errors %}
+                            <div class="form-error">
+                                {% for error in form.target_url.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-help">Enter the full URL of the target website (e.g., https://example.com)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.wordlist.label(class="form-label") }}
+                        {{ form.wordlist(class="form-control") }}
+                        <small class="form-help">Select a predefined wordlist or choose "Custom Wordlist" to provide your own</small>
+                    </div>
+                    
+                    <div class="form-group" id="custom-wordlist-group">
+                        {{ form.custom_wordlist.label(class="form-label") }}
+                        {{ form.custom_wordlist(class="form-control", rows=5) }}
+                        <small class="form-help">Enter one directory name per line (only used if "Custom Wordlist" is selected above)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.extensions.label(class="form-label") }}
+                        {{ form.extensions(class="form-control", placeholder="php,html,txt") }}
+                        <small class="form-help">Enter file extensions separated by commas (e.g., php,html,txt). Leave empty to only fuzz directories</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group form-group-half">
+                            {{ form.threads.label(class="form-label") }}
+                            {{ form.threads(class="form-control", min=1, max=50) }}
+                            {% if form.threads.errors %}
+                                <div class="form-error">
+                                    {% for error in form.threads.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-help">Number of concurrent threads (1-50)</small>
+                        </div>
+                        
+                        <div class="form-group form-group-half">
+                            {{ form.timeout.label(class="form-label") }}
+                            {{ form.timeout(class="form-control", min=1) }}
+                            {% if form.timeout.errors %}
+                                <div class="form-error">
+                                    {% for error in form.timeout.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-help">Request timeout in seconds</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group form-actions">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; Web Fuzzer Tool</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Show/hide custom wordlist textarea based on wordlist selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const wordlistSelect = document.getElementById('wordlist');
+            const customWordlistGroup = document.getElementById('custom-wordlist-group');
+            
+            function toggleCustomWordlist() {
+                if (wordlistSelect.value === 'custom') {
+                    customWordlistGroup.style.display = 'block';
+                } else {
+                    customWordlistGroup.style.display = 'none';
+                }
+            }
+            
+            // Initial toggle based on current value
+            toggleCustomWordlist();
+            
+            // Toggle on change
+            wordlistSelect.addEventListener('change', toggleCustomWordlist);
+        });
+    </script>
+</body>
+</html>
+

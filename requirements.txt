@@ -6,3 +6,5 @@ cohere==5.13.6
 dnspython==2.7.0
 requests==2.32.3
 python-dotenv==1.0.1
+flask==3.0.0
+flask-wtf==1.2.1

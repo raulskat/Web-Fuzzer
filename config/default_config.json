@@ -1,5 +1,5 @@
 {
-    "target_url": "http://github.com",  
+    "target_url": "https://demo.owasp-juice.shop",  
     "target_domain": "github.com",  
     "directories": {
       "enabled": true,                 
@@ -13,6 +13,11 @@
       "enabled": true,                
       "wordlist": "src/wordlists/api_endpoints.txt" 
     },
+    "parameter_fuzzing": {
+    "enabled": true,
+    "wordlist": "src/wordlists/parameter_wordlist.txt"
+    },
+
     "request_options": {
       "method": "GET",                 
       "timeout": 10,                   

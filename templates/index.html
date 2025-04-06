@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Application Fuzzer</title>
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    /* Home Page Add-On */
+
+/* Refined Navbar for Home Page */
+.home-theme .navbar {
+  padding: 0.75rem 1.5rem;
+}
+
+.home-theme .navbar-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.home-theme .navbar-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.home-theme .navbar-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.home-theme .navbar-link:hover,
+.home-theme .navbar-link.active {
+  color: var(--accent-color);
+}
+
+.home-theme .navbar-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease;
+}
+
+.home-theme .navbar-link:hover::after,
+.home-theme .navbar-link.active::after {
+  width: 100%;
+}
+
+/* Masonry Card Layout for Home Page */
+/* Use auto-fit so cards expand when there's extra space */
+.home-theme .gallery-masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card Styles */
+.home-theme .gallery-masonry .card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Card Hover - Glowing Border Effect */
+.home-theme .gallery-masonry .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--glass-border), 0 0 0 4px var(--accent-shadow);
+}
+</style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Web Fuzzer</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}" class="active">Home</a></li>
+                    <li><a href="{{ url_for('directory_fuzzing') }}">Directory Fuzzing</a></li>
+                    <li><a href="{{ url_for('subdomain_fuzzing') }}">Subdomain Fuzzing</a></li>
+                    <li><a href="{{ url_for('api_endpoints_fuzzing') }}">API Endpoint Fuzzing</a></li>
+                    <li><a href="{{ url_for('results_list') }}">Results</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="fuzzer-section">
+            <h2>Welcome to Web Application Fuzzer</h2>
+            <p>A comprehensive tool for web security testing and discovery.</p>
+            <p>Choose a fuzzing operation to begin:</p>
+            <div class="card-container">
+                <div class="card">
+                    <h3>Directory Fuzzing</h3>
+                    <p>Discover hidden directories and files on web servers.</p>
+                    <a href="{{ url_for('directory_fuzzing') }}" class="btn btn-primary">Start Directory Fuzzing</a>
+                </div>
+                
+                <div class="card">
+                    <h3>Subdomain Fuzzing</h3>
+                    <p>Find subdomains of a target domain.</p>
+                    <a href="{{ url_for('subdomain_fuzzing') }}" class="btn btn-primary">Start Subdomain Fuzzing</a>
+                </div>
+                
+                <div class="card">
+                    <h3>API Endpoint Fuzzing</h3>
+                    <p>Discover hidden API endpoints on web applications.</p>
+                    <a href="{{ url_for('api_endpoints_fuzzing') }}" class="btn btn-primary">Start API Endpoint Fuzzing</a>
+                </div>
+                
+                
+                <div class="card">
+                    <h3>Results</h3>
+                    <p>View and analyze previous fuzzing operation results.</p>
+                    <a href="{{ url_for('results_list') }}" class="btn btn-primary">View Results</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; Web Fuzzer Tool</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Card height normalization
+            const cards = document.querySelectorAll('.card');
+            let maxHeight = 0;
+            
+            // Find max height
+            cards.forEach(card => {
+                if (card.offsetHeight > maxHeight) {
+                    maxHeight = card.offsetHeight;
+                }
+            });
+            
+            // Set all cards to max height
+            cards.forEach(card => {
+                card.style.height = maxHeight + 'px';
+            });
+        });
+    </script>
+</body>
+</html>

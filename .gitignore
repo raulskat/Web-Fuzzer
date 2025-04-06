@@ -2,3 +2,4 @@ fuzzer_log.log
 __pycache__
 venv
 .env
+results

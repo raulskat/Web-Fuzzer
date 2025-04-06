@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+    <h2>API Endpoints Fuzzing</h2>
+    <form method="POST" enctype="multipart/form-data" class="my-4">
+        <div class="form-group mb-3">
+            <label for="target_url">Target URL:</label>
+            <input type="text" class="form-control" id="target_url" name="target_url" 
+                placeholder="Enter target URL (e.g., example.com or https://example.com)" required>
+            <small class="form-text text-muted">
+                If protocol is not specified, HTTPS will be used by default.
+            </small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>HTTP Methods to Test:</label>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="http_methods" value="GET" id="method_get" checked>
+                <label class="form-check-label" for="method_get">GET</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="http_methods" value="POST" id="method_post">
+                <label class="form-check-label" for="method_post">POST</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="http_methods" value="PUT" id="method_put">
+                <label class="form-check-label" for="method_put">PUT</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="http_methods" value="DELETE" id="method_delete">
+                <label class="form-check-label" for="method_delete">DELETE</label>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="verify_ssl" name="verify_ssl">
+                <label class="form-check-label" for="verify_ssl">Verify SSL Certificates</label>
+                <small class="form-text text-muted d-block">
+                    Enable SSL certificate verification. Disable for self-signed or invalid certificates.
+                </small>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="use_wordlist" name="use_wordlist">
+                <label class="form-check-label" for="use_wordlist">Use Custom Wordlist</label>
+            </div>
+            <div id="wordlist_upload" style="display: none;">
+                <input type="file" class="form-control" name="wordlist_file" accept=".txt">
+                <small class="form-text text-muted">
+                    Upload a .txt file with one endpoint per line
+                </small>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Start Fuzzing</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('use_wordlist').addEventListener('change', function() {
+        document.getElementById('wordlist_upload').style.display = this.checked ? 'block' : 'none';
+    });
+</script>
+{% endblock %}
+
