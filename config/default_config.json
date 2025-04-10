@@ -15,7 +15,7 @@
     },
     "parameter_fuzzing": {
     "enabled": true,
-    "wordlist": "src/wordlists/parameter_wordlist.txt"
+    "wordlist": "src/wordLists/parameter_wordlist.txt"
     },
 
     "request_options": {

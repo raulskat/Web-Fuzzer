@@ -64,27 +64,24 @@ class VirtualHostFuzzer:
             return False
             
     def _make_request(self, domain: str) -> Dict[str, Any]:
-        """
-        Make a request to a virtual host
-        
-        Args:
-            domain: The domain name to use as Host header
-            
-        Returns:
-            Dict containing the response details
-        """
+    
         url = f"http://{self.target_ip}"
         headers = {"Host": domain}
         
         try:
             start_time = time.time()
+            # Allow redirects to follow 301 responses automatically
             response = self.session.get(
                 url, 
                 headers=headers, 
                 timeout=self.timeout,
-                allow_redirects=False
+                allow_redirects=True  # Allow automatic redirects
             )
             elapsed_time = time.time() - start_time
+            
+            # If there was a redirection, record the final URL
+            final_url = response.url
+            is_redirected = (response.status_code in [301, 302]) and (final_url != url)
             
             return {
                 "domain": domain,
@@ -93,7 +90,9 @@ class VirtualHostFuzzer:
                 "response_time": elapsed_time,
                 "headers": dict(response.headers),
                 "title": self._extract_title(response.text),
-                "redirect_url": response.headers.get("Location", "")
+                "redirect_url": response.headers.get("Location", ""),
+                "final_url": final_url if is_redirected else "",  # Track the final URL after redirect
+                "is_redirected": is_redirected  # Flag to check if the domain was redirected
             }
         except requests.RequestException as e:
             return {
@@ -104,9 +103,11 @@ class VirtualHostFuzzer:
                 "headers": {},
                 "title": "",
                 "redirect_url": "",
+                "final_url": "",
+                "is_redirected": False,
                 "error": str(e)
             }
-            
+          
     def _extract_title(self, html: str) -> str:
         """
         Extract the title from HTML content
@@ -217,3 +218,41 @@ class VirtualHostFuzzer:
         
         return sorted_results
 
+import sys
+
+def main():
+    if len(sys.argv) < 3:
+        print("Usage: python virtual_host_fuzzer.py <target_ip> <wordlist_file>")
+        sys.exit(1)
+
+    target_ip = sys.argv[1]
+    wordlist_file = sys.argv[2]
+    
+    # Load wordlist from the file
+    try:
+        with open(wordlist_file, "r") as f:
+            wordlist = [line.strip() for line in f.readlines()]
+    except FileNotFoundError:
+        print(f"Error: The file '{wordlist_file}' was not found.")
+        sys.exit(1)
+    
+    # Create an instance of the VirtualHostFuzzer class
+    fuzzer = VirtualHostFuzzer(target_ip, wordlist)
+    
+    print(f"Starting fuzzing on {target_ip} with {len(wordlist)} domains...")
+    
+    # Run fuzzing and get results
+    results = fuzzer.fuzz()
+    
+    print("\nFuzzing complete. Results:")
+    for result in results:
+        print(f"Domain: {result['domain']}, Status: {result['status_code']}, "
+              f"Content Length: {result['content_length']}, Response Time: {result['response_time']:.2f} seconds")
+        
+    # Optionally, save the results to a file
+    with open("fuzzing_results.json", "w") as f:
+        import json
+        json.dump(results, f, indent=4)
+
+if __name__ == "__main__":
+    main()

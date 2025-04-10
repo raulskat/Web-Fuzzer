@@ -13,11 +13,12 @@ if config['api_endpoints']['enabled']:
     print("API Endpoints fuzzing enabled!")
 
 class ApiFuzzer:
-    def __init__(self, base_url, endpoints, methods=["GET", "POST", "PUT", "DELETE"], threads=5, delay=0.5):
+    def __init__(self, base_url, endpoints, methods=["GET", "POST", "PUT", "DELETE"], threads=5, delay=0.5, verify_ssl=True):
         self.base_url = base_url
         self.endpoints = endpoints
         self.methods = methods
-        self.request_handler = RequestHandler()
+        self.verify_ssl = verify_ssl
+        self.request_handler = RequestHandler(verify_ssl=verify_ssl)
         self.threads = threads
         self.delay = delay
         self.logger = setup_logger("api_fuzzer",config["logging"]["log_file"])

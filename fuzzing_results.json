@@ -1,9 +1,104 @@
-{
-    "directories": [],
-    "subdomains": [],
-    "api_endpoints": [],
-    "meta": {
-        "timestamp": "2025-03-08 11:28:56",
-        "tool": "Web Application Fuzzer"
+[
+    {
+        "domain": "example.com",
+        "status_code": 200,
+        "content_length": 1256,
+        "response_time": 0.528022289276123,
+        "headers": {
+            "Accept-Ranges": "bytes",
+            "Content-Type": "text/html",
+            "ETag": "\"84238dfc8092e5d9c0dac8ef93371a07:1736799080.121134\"",
+            "Last-Modified": "Mon, 13 Jan 2025 20:11:20 GMT",
+            "Vary": "Accept-Encoding",
+            "Content-Encoding": "gzip",
+            "Content-Length": "648",
+            "Cache-Control": "max-age=2131",
+            "Date": "Thu, 10 Apr 2025 15:33:35 GMT",
+            "Connection": "keep-alive"
+        },
+        "title": "Example Domain",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
+    },
+    {
+        "domain": "api.local",
+        "status_code": 404,
+        "content_length": 2906,
+        "response_time": 0.47704339027404785,
+        "headers": {
+            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
+            "Server": "Kestrel",
+            "Transfer-Encoding": "chunked",
+            "Strict-Transport-Security": "max-age=31536000"
+        },
+        "title": "",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
+    },
+    {
+        "domain": "test.local",
+        "status_code": 404,
+        "content_length": 2906,
+        "response_time": 0.47885656356811523,
+        "headers": {
+            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
+            "Server": "Kestrel",
+            "Transfer-Encoding": "chunked",
+            "Strict-Transport-Security": "max-age=31536000"
+        },
+        "title": "",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
+    },
+    {
+        "domain": "staging.local",
+        "status_code": 404,
+        "content_length": 2906,
+        "response_time": 0.49065470695495605,
+        "headers": {
+            "Date": "Thu, 10 Apr 2025 15:33:35 GMT",
+            "Server": "Kestrel",
+            "Transfer-Encoding": "chunked",
+            "Strict-Transport-Security": "max-age=31536000"
+        },
+        "title": "",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
+    },
+    {
+        "domain": "admin.local",
+        "status_code": 404,
+        "content_length": 2906,
+        "response_time": 0.5011987686157227,
+        "headers": {
+            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
+            "Server": "Kestrel",
+            "Transfer-Encoding": "chunked",
+            "Strict-Transport-Security": "max-age=31536000"
+        },
+        "title": "",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
+    },
+    {
+        "domain": "dev.local",
+        "status_code": 404,
+        "content_length": 2906,
+        "response_time": 0.5382018089294434,
+        "headers": {
+            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
+            "Server": "Kestrel",
+            "Transfer-Encoding": "chunked",
+            "Strict-Transport-Security": "max-age=31536000"
+        },
+        "title": "",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
     }
-}
+]

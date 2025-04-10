@@ -15,11 +15,12 @@ if config['subdomains']['enabled']:
     print("SubDomain fuzzing enabled!")
 
 class SubdomainFuzzer:
-    def __init__(self, domain, wordlist, threads=5, delay=0.5):
+    def __init__(self, domain, wordlist, threads=5, delay=0.5, verify_ssl=True):
         self.domain = domain
         self.wordlist = wordlist
         self.threads = threads
         self.delay = delay
+        self.verify_ssl = verify_ssl
         self.logger = setup_logger("subdomain_fuzzer",config["logging"]["log_file"])
         self.discovered_subdomains = []
     
@@ -93,7 +94,7 @@ class SubdomainFuzzer:
             start_time = datetime.now()
             try:
                 import requests
-                response = requests.get(url, timeout=5, allow_redirects=False)
+                response = requests.get(url, timeout=5, allow_redirects=False, verify=self.verify_ssl)
                 response_time = (datetime.now() - start_time).total_seconds() * 1000
                 
                 return {
@@ -198,7 +199,7 @@ if __name__ == "__main__":
         with open(wordlist_path, "r") as file:
             wordlist = [line.strip() for line in file]
 
-        fuzzer = SubdomainFuzzer(domain, wordlist,threads=5)
+        fuzzer = SubdomainFuzzer(domain, wordlist, threads=5, verify_ssl=True)
         discovered = fuzzer.fuzz_subdomains()
         print(f"Discovered Subdomains: {discovered}")
     else:

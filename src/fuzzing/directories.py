@@ -1,6 +1,7 @@
 
 # src/fuzzing/directories.py
 import time
+# import asyncio - No longer needed for synchronous requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from src.utils.logger import setup_logger
@@ -23,11 +24,12 @@ if config['directories']['enabled']:
     print("Directory fuzzing enabled!")
 
 class DirectoryFuzzer:
-    def __init__(self, target_url, wordlist_source="both", custom_wordlist_path=None, threads=5, delay=0.5):
+    def __init__(self, target_url, wordlist_source="both", custom_wordlist_path=None, threads=5, delay=0.5, verify_ssl=True):
         self.base_url = target_url
         self.wordlist_source = wordlist_source  # Can be "ai", "predefined", or "both"
         self.custom_wordlist_path = custom_wordlist_path
-        self.request_handler = RequestHandler()
+        self.verify_ssl = verify_ssl
+        self.request_handler = RequestHandler(verify_ssl=verify_ssl)
         self.threads = threads
         self.delay = delay
         self.logger = setup_logger("directory_fuzzer", config["logging"]["log_file"])
@@ -156,6 +158,7 @@ class DirectoryFuzzer:
         url = f"{self.base_url}/{path}"
         try:
             # Use the RequestHandler to send a request and get the response dictionary
+            # Using the synchronous version of send_request
             response_dict = self.request_handler.send_request(url)
             
             if response_dict is None:

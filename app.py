@@ -10,6 +10,12 @@ import json
 import csv
 from io import StringIO
 import requests
+import asyncio
+import aiohttp
+from src.fuzzing.directories import DirectoryFuzzer
+from src.fuzzing.subdomains import SubdomainFuzzer
+from src.fuzzing.api_endpoints import ApiFuzzer
+from src.utils.request_handler import RequestHandler
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -23,160 +29,6 @@ os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'txt'}
 
-def generate_subdomains(count=20):
-    common_subdomains = [
-        'www', 'mail', 'remote', 'blog', 'webmail', 'server', 'ns1', 'ns2', 
-        'smtp', 'secure', 'vpn', 'api', 'dev', 'staging', 'test', 'admin',
-        'ftp', 'cloud', 'portal', 'support'
-    ]
-    
-    # Return a subset or the whole list based on requested size
-    return common_subdomains[:min(count, len(common_subdomains))]
-
-def generate_api_endpoints(count=15):
-    common_endpoints = [
-        'api/v1', 'api/v2', 'api/users', 'api/products', 'api/auth', 
-        'api/login', 'api/register', 'api/data', 'api/search', 'api/settings',
-        'api/admin', 'api/files', 'api/upload', 'api/config', 'api/stats'
-    ]
-    
-    # Return a subset or the whole list based on requested size
-    return common_endpoints[:min(count, len(common_endpoints))]
-class RequestHandler:
-    def __init__(self, verify_ssl=True):
-        self.headers = {
-            'User-Agent': 'Web-Fuzzer/1.0',
-            'Accept': '*/*'
-        }
-        self.timeout = 10
-        self.verify_ssl = verify_ssl
-
-    def send_request(self, url):
-        """Send HTTP request to a URL."""
-        try:
-            start_time = dt.now()
-            response = requests.get(
-                url, 
-                headers=self.headers, 
-                timeout=self.timeout, 
-                allow_redirects=False,
-                verify=self.verify_ssl
-            )
-            elapsed_time = (dt.now() - start_time).total_seconds() * 1000  # Convert to milliseconds
-            
-            # Extract domain and path for logging
-            parsed_url = urlparse(url)
-            domain = parsed_url.netloc
-            path = parsed_url.path
-            
-            log_message = f"Request to {domain}{path}: Status {response.status_code}, Size {len(response.content)} bytes, Time {int(elapsed_time)}ms"
-            if response.status_code >= 400:
-                app.logger.warning(log_message)
-            else:
-                app.logger.info(log_message)
-            
-            return {
-                "url": url,
-                "status": response.status_code,
-                "size": len(response.content),
-                "response_time": int(elapsed_time),
-                "content_type": response.headers.get('Content-Type', 'N/A'),
-                "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S')
-            }
-        except requests.exceptions.RequestException as e:
-            error_type = type(e).__name__
-            error_message = str(e)
-            
-            # Extract domain and path for logging
-            parsed_url = urlparse(url)
-            domain = parsed_url.netloc
-            path = parsed_url.path
-            
-            app.logger.error(f"Error requesting {domain}{path}: {error_type}: {error_message}")
-            
-            return {
-                "url": url,
-                "status": "Error",
-                "size": "N/A",
-                "response_time": "N/A",
-                "content_type": "N/A",
-                "error": str(e),
-                "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S')
-            }
-    def send_request_api(self, base_url, endpoint, method='GET'):
-        """Send request to API endpoint.
-        Args:
-            base_url (str): The base URL (e.g., https://example.com)
-            endpoint (str): The API endpoint (e.g., api/v1)
-            method (str): HTTP method to use (default: GET)
-        """
-        # Remove any hash from base_url
-        base_url = base_url.split('#')[0].rstrip('/')
-        
-        # Ensure proper URL construction
-        if not base_url.startswith(('http://', 'https://')):
-            base_url = f"https://{base_url}"
-        
-        endpoint = endpoint.lstrip('/')
-        url = f"{base_url}/{endpoint}"
-        
-        try:
-            start_time = dt.now()
-            response = requests.request(
-                method=method,
-                url=url,
-                headers=self.headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify_ssl
-            )
-            elapsed_time = (dt.now() - start_time).total_seconds() * 1000
-
-            # Extract domain and path for logging
-            parsed_url = urlparse(url)
-            domain = parsed_url.netloc
-            path = parsed_url.path
-
-            log_message = f"[{method}] {domain}{path}: Status {response.status_code}, Size {len(response.content)} bytes, Time {int(elapsed_time)}ms"
-            
-            if response.status_code == 401:
-                app.logger.info(f"{log_message} (Auth required)")
-            elif response.status_code >= 400:
-                app.logger.warning(log_message)
-            else:
-                app.logger.info(log_message)
-                
-            return {
-                "url": url,
-                "method": method,
-                "status": response.status_code,
-                "size": len(response.content),
-                "response_time": int(elapsed_time),
-                "content_type": response.headers.get('Content-Type', 'N/A'),
-                "auth_required": response.status_code == 401,
-                "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S')
-            }
-        except requests.exceptions.RequestException as e:
-            error_type = type(e).__name__
-            error_message = str(e)
-            
-            # Extract domain and path for logging
-            parsed_url = urlparse(url)
-            domain = parsed_url.netloc
-            path = parsed_url.path
-            
-            app.logger.error(f"Error requesting [{method}] {domain}{path}: {error_type}: {error_message}")
-            
-            return {
-                "url": url,
-                "method": method,
-                "status": "Error",
-                "size": 0,
-                "response_time": 0,
-                "content_type": "N/A",
-                "error": f"{error_type}: {error_message}",
-                "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S')
-            }
 @app.route('/')
 def index():
     """Home page."""
@@ -199,41 +51,30 @@ def directory_fuzzing():
         if not target_url.startswith(('http://', 'https://')):
             target_url = f"https://{target_url}"
 
-        # Use uploaded wordlist or generate a default one
-        if use_wordlist and wordlist_file and allowed_file(wordlist_file.filename):
-            filename = secure_filename(wordlist_file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            wordlist_file.save(filepath)
-
-            with open(filepath, 'r') as f:
-                directories = [line.strip() for line in f if line.strip()]
-        else:
-            # Use default directory list
-            directories = [
-                'admin', 'wp-admin', 'wp-content', 'upload', 'uploads', 'backup',
-                'backups', 'config', 'dashboard', 'login', 'wp-login.php', 'administrator',
-                'phpmyadmin', 'panel', 'cpanel', 'webmail', 'mail', 'api', 'docs',
-                'documentation', 'blog', 'admin.php', 'old', 'test', 'staging'
-            ]
-
         # Generate timestamp for results file
         timestamp = dt.now().strftime('%Y%m%d%H%M%S')
         result_filename = f"directories_{timestamp}.json"
         result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
 
-        # Create request handler
-        request_handler = RequestHandler(verify_ssl=verify_ssl)
+        # Process wordlist
+        custom_wordlist_path = None
+        if use_wordlist and wordlist_file and allowed_file(wordlist_file.filename):
+            filename = secure_filename(wordlist_file.filename)
+            custom_wordlist_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            wordlist_file.save(custom_wordlist_path)
 
-        # Make HTTP requests
-        processed_urls = []
-        flash(f"Making HTTP requests to {len(directories)} directories. This may take a moment...", "info")
-
-        for directory in directories:
-            # Remove leading/trailing slashes
-            directory = directory.strip('/')
-            url = f"{target_url}/{directory}"
-            result = request_handler.send_request(url)
-            processed_urls.append(result)
+        # Initialize directory fuzzer
+        fuzzer = DirectoryFuzzer(
+            target_url=target_url,
+            wordlist_source="predefined",
+            custom_wordlist_path=custom_wordlist_path,
+            verify_ssl=verify_ssl
+        )
+        
+        flash(f"Starting directory fuzzing on {target_url}. This may take a moment...", "info")
+        
+        # Run the fuzzing
+        processed_urls = fuzzer.fuzz_directories()
 
         # Calculate statistics
         total_urls = len(processed_urls)
@@ -293,33 +134,40 @@ def subdomain_fuzzing():
         if target_domain.startswith('www.'):
             target_domain = target_domain[4:]
 
-        # Use uploaded wordlist or generate one
+        # Use uploaded wordlist or default list
+        wordlist = []
+        custom_wordlist_path = None
         if use_wordlist and wordlist_file and allowed_file(wordlist_file.filename):
             filename = secure_filename(wordlist_file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            wordlist_file.save(filepath)
+            custom_wordlist_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            wordlist_file.save(custom_wordlist_path)
 
-            with open(filepath, 'r') as f:
-                subdomains = [line.strip() for line in f if line.strip()]
+            # Load wordlist from file
+            with open(custom_wordlist_path, 'r') as f:
+                wordlist = [line.strip() for line in f if line.strip()]
         else:
-            subdomains = generate_subdomains(20)
+            # Use default wordlist from configuration
+            with open("wordlists/subdomains.txt", 'r') as f:
+                wordlist = [line.strip() for line in f if line.strip()][:20]  # Limit to 20 for testing
 
         # Generate timestamp for results file
         timestamp = dt.now().strftime('%Y%m%d%H%M%S')
         result_filename = f"subdomains_{timestamp}.json"
         result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
 
-        # Create request handler
-        request_handler = RequestHandler(verify_ssl=verify_ssl)
-
-        # Make HTTP requests
-        processed_urls = []
-        flash(f"Making HTTP requests to {len(subdomains)} subdomains. This may take a moment...", "info")
-
-        for subdomain in subdomains:
-            url = f"https://{subdomain}.{target_domain}"
-            result = request_handler.send_request(url)
-            processed_urls.append(result)
+        # Initialize subdomain fuzzer
+        fuzzer = SubdomainFuzzer(
+            domain=target_domain,
+            wordlist=wordlist,
+            threads=5,
+            delay=0.5,
+            verify_ssl=verify_ssl
+        )
+        
+        flash(f"Making HTTP requests to {len(wordlist)} subdomains. This may take a moment...", "info")
+        
+        # Run the fuzzing
+        processed_urls = fuzzer.fuzz_subdomains()
 
         # Calculate statistics
         total_urls = len(processed_urls)
@@ -365,7 +213,7 @@ def api_endpoints_fuzzing():
         use_wordlist = request.form.get('use_wordlist') == 'on'
         wordlist_file = request.files.get('wordlist_file')
         http_methods = request.form.getlist('http_methods') or ['GET']  # Default to GET if none selected
-        verify_ssl = request.form.get('verify_ssl') == 'on'  # Get SSL verification preference
+        verify_ssl = request.form.get('verify_ssl') == 'on'
 
         # Validate URL
         if not target_url:
@@ -375,34 +223,59 @@ def api_endpoints_fuzzing():
         if not target_url.startswith(('http://', 'https://')):
             target_url = f"https://{target_url}"
 
-        # Use uploaded wordlist or generate one
+        # Process wordlist
+        endpoints = []
         if use_wordlist and wordlist_file and allowed_file(wordlist_file.filename):
             filename = secure_filename(wordlist_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             wordlist_file.save(filepath)
-
             with open(filepath, 'r') as f:
                 endpoints = [line.strip() for line in f if line.strip()]
         else:
-            endpoints = generate_api_endpoints(15)
+            # Use default wordlist from configuration
+            with open("wordlists/api_endpoints.txt", 'r') as f:
+                endpoints = [line.strip() for line in f if line.strip()][:15]  # Limit to 15 for testing
 
         # Generate timestamp for results file
         timestamp = dt.now().strftime('%Y%m%d%H%M%S')
         result_filename = f"api_endpoints_{timestamp}.json"
         result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
 
-        # Create request handler
-        request_handler = RequestHandler(verify_ssl=verify_ssl)
+        # Initialize API fuzzer
+        fuzzer = ApiFuzzer(
+            base_url=target_url,
+            endpoints=endpoints,
+            methods=http_methods,
+            threads=5,
+            delay=0.5,
+            verify_ssl=verify_ssl
+        )
 
-        # Make HTTP requests to each endpoint with each method
-        processed_urls = []
         flash(f"Making HTTP requests to {len(endpoints)} API endpoints with {len(http_methods)} HTTP methods. This may take a moment...", "info")
 
-        for endpoint in endpoints:
-            for method in http_methods:
-                result = request_handler.send_request_api(target_url, endpoint, method)
-                processed_urls.append(result)
-
+        # Run the fuzzing
+        fuzzing_results = fuzzer.fuzz_api_endpoints()
+        
+        # Convert results to the expected dictionary format
+        processed_urls = []
+        for result in fuzzing_results:
+            if result:
+                url, method, status_text = result
+                # Convert the tuple result to dictionary format
+                result_dict = {
+                    'url': url,
+                    'method': method,
+                    'status': 200 if status_text == 'valid' else 
+                              403 if status_text == 'forbidden' else 
+                              404 if status_text == 'not_found' else 
+                              500 if status_text == 'server_error' else 0,
+                    'size': 'N/A',
+                    'response_time': 'N/A',
+                    'content_type': 'N/A',
+                    'auth_required': status_text == 'forbidden'
+                }
+                processed_urls.append(result_dict)
+                
         # Calculate statistics
         total_urls = len(processed_urls)
         status_2xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 200 <= r.get('status', 0) < 300)
@@ -613,7 +486,7 @@ def export_json(filename):
     return response
 
 @app.route('/update_all_urls/<filename>')
-def update_all_urls(filename):
+async def update_all_urls(filename):
     """Update all URLs in a result file with status codes, sizes, and other information"""
     filepath = os.path.join(app.config['RESULT_FOLDER'], filename)
     
@@ -639,6 +512,9 @@ def update_all_urls(filename):
         flash('Unsupported fuzzing type', 'error')
         return redirect(url_for('results_list'))
     
+    # Get verify_ssl from meta data if available, default to True
+    verify_ssl = data.get('meta', {}).get('ssl_verification', True)
+    
     # Create a request handler
     request_handler = RequestHandler()
     
@@ -647,24 +523,35 @@ def update_all_urls(filename):
     total_urls = len(urls)
     updated_count = 0
     
-    for i, url in enumerate(urls):
+    # Create async tasks for all URLs
+    async def process_url(url_obj):
         # Check if URL is already a dict with status information
-        if isinstance(url, dict) and url.get('status') not in ['N/A', 'Error']:
-            processed_urls.append(url)
-            continue
+        if isinstance(url_obj, dict) and url_obj.get('status') not in ['N/A', 'Error']:
+            return url_obj
             
         # Get the URL string
-        url_str = url if isinstance(url, str) else url.get('url', '')
+        url_str = url_obj if isinstance(url_obj, str) else url_obj.get('url', '')
         
         # Skip empty URLs
         if not url_str:
-            continue
+            return None
             
         # Make request and get result
         try:
-            result = request_handler.send_request(url_str)
-            processed_urls.append(result)
-            updated_count += 1
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=verify_ssl)) as session:
+                start_time = dt.now()
+                async with session.get(url_str, timeout=10) as response:
+                    response_time = (dt.now() - start_time).total_seconds()
+                    content = await response.read()
+                    
+                    result = {
+                        'url': url_str,
+                        'status': response.status,
+                        'size': len(content),
+                        'response_time': f"{response_time:.2f}s",
+                        'content_type': response.headers.get('Content-Type', 'N/A')
+                    }
+                    return result
         except Exception as e:
             # If error, add URL with error info
             error_result = {
@@ -675,7 +562,22 @@ def update_all_urls(filename):
                 'content_type': 'N/A',
                 'error': str(e)
             }
-            processed_urls.append(error_result)
+            return error_result
+    
+    # Create and run tasks for all URLs
+    tasks = []
+    for url in urls:
+        tasks.append(process_url(url))
+        
+    # Wait for all tasks to complete
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    # Process results
+    for result in results:
+        if result is not None:
+            processed_urls.append(result)
+            if isinstance(result, dict) and result.get('status') != 'Error':
+                updated_count += 1
     
     # Update the appropriate section in the data
     if fuzz_type == 'directories':
