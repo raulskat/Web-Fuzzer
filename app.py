@@ -78,10 +78,16 @@ def directory_fuzzing():
 
         # Calculate statistics
         total_urls = len(processed_urls)
-        status_2xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 200 <= r.get('status', 0) < 300)
-        status_3xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 300 <= r.get('status', 0) < 400)
-        status_4xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 400 <= r.get('status', 0) < 500)
-        status_5xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 500 <= r.get('status', 0) < 600)
+        def get_status(result):
+            """Helper to get status from either status or status_code"""
+            if isinstance(result.get('status_code'), int):
+                return result.get('status_code')
+            return result.get('status', 0)
+            
+        status_2xx = sum(1 for r in processed_urls if 200 <= get_status(r) < 300)
+        status_3xx = sum(1 for r in processed_urls if 300 <= get_status(r) < 400)
+        status_4xx = sum(1 for r in processed_urls if 400 <= get_status(r) < 500)
+        status_5xx = sum(1 for r in processed_urls if 500 <= get_status(r) < 600)
 
         # Prepare results structure
         results = {
@@ -171,10 +177,16 @@ def subdomain_fuzzing():
 
         # Calculate statistics
         total_urls = len(processed_urls)
-        status_2xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 200 <= r.get('status', 0) < 300)
-        status_3xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 300 <= r.get('status', 0) < 400)
-        status_4xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 400 <= r.get('status', 0) < 500)
-        status_5xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 500 <= r.get('status', 0) < 600)
+        def get_status(result):
+            """Helper to get status from either status or status_code"""
+            if isinstance(result.get('status_code'), int):
+                return result.get('status_code')
+            return result.get('status', 0)
+            
+        status_2xx = sum(1 for r in processed_urls if 200 <= get_status(r) < 300)
+        status_3xx = sum(1 for r in processed_urls if 300 <= get_status(r) < 400)
+        status_4xx = sum(1 for r in processed_urls if 400 <= get_status(r) < 500)
+        status_5xx = sum(1 for r in processed_urls if 500 <= get_status(r) < 600)
 
         # Prepare results structure
         results = {
@@ -278,10 +290,16 @@ def api_endpoints_fuzzing():
                 
         # Calculate statistics
         total_urls = len(processed_urls)
-        status_2xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 200 <= r.get('status', 0) < 300)
-        status_3xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 300 <= r.get('status', 0) < 400)
-        status_4xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 400 <= r.get('status', 0) < 500)
-        status_5xx = sum(1 for r in processed_urls if isinstance(r.get('status'), int) and 500 <= r.get('status', 0) < 600)
+        def get_status(result):
+            """Helper to get status from either status or status_code"""
+            if isinstance(result.get('status_code'), int):
+                return result.get('status_code')
+            return result.get('status', 0)
+            
+        status_2xx = sum(1 for r in processed_urls if 200 <= get_status(r) < 300)
+        status_3xx = sum(1 for r in processed_urls if 300 <= get_status(r) < 400)
+        status_4xx = sum(1 for r in processed_urls if 400 <= get_status(r) < 500)
+        status_5xx = sum(1 for r in processed_urls if 500 <= get_status(r) < 600)
         auth_required = sum(1 for r in processed_urls if r.get('auth_required', False))
 
         # Prepare results structure
@@ -313,6 +331,137 @@ def api_endpoints_fuzzing():
         return redirect(url_for('results', filename=result_filename))
 
     return render_template('api_endpoints_fuzzing.html')
+
+@app.route('/virtualhost_fuzzing', methods=['GET', 'POST'])
+def virtualhost_fuzzing():
+    if request.method == 'POST':
+        # Start the fuzzing process (this should call your fuzzer's logic)
+        
+        if request.method == 'POST':
+            target_ip = request.form.get('target_ip', '').strip()
+            use_wordlist = request.form.get('use_wordlist') == 'on'
+            wordlist_file = request.files.get('wordlist_file')
+
+        if not target_ip:
+            flash('Please enter a target IP address', 'error')
+            return redirect(url_for('virtualhost_fuzzing'))
+
+        if use_wordlist and wordlist_file and allowed_file(wordlist_file.filename):
+            filename = secure_filename(wordlist_file.filename)
+            custom_wordlist_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            wordlist_file.save(custom_wordlist_path)
+
+            with open(custom_wordlist_path, 'r') as f:
+                wordlist = [line.strip() for line in f if line.strip()]
+        else:
+            flash("Please upload a valid wordlist file", "error")
+            return redirect(url_for('virtualhost_fuzzing'))
+
+        # Run the fuzzer
+        try:
+            from src.fuzzing.virtual_hosts import VirtualHostFuzzer  # adjust import path
+            fuzzer = VirtualHostFuzzer(target_ip=target_ip, wordlist=wordlist)
+            results = fuzzer.fuzz()
+        except Exception as e:
+            flash(f"Fuzzing failed: {str(e)}", "error")
+            return redirect(url_for('virtualhost_fuzzing'))
+        # Process the results
+        processed_urls = []
+        status_code_counts = {
+            '2xx': 0,
+            '3xx': 0,
+            '4xx': 0,
+            '5xx': 0,
+            'redirected': 0
+        }
+        
+        for result in results:
+            if result:
+                # Extract necessary fields from the result dictionary
+                domain = result.get('domain', '')
+                status_code = result.get('status_code', 0)
+                title = result.get('title', '')
+                content_length = result.get('content_length', 'N/A')
+                response_time = result.get('response_time', 'N/A')
+                headers = result.get('headers', {})
+                is_redirected = result.get('is_redirected', False)
+
+                # Classify status codes for summary
+                if 200 <= status_code < 300:
+                    status_code_counts['2xx'] += 1
+                elif 300 <= status_code < 400:
+                    status_code_counts['3xx'] += 1
+                elif 400 <= status_code < 500:
+                    status_code_counts['4xx'] += 1
+                elif 500 <= status_code < 600:
+                    status_code_counts['5xx'] += 1
+                if is_redirected:
+                    status_code_counts['redirected'] += 1
+                
+                # Build the result dictionary
+                processed_urls.append({
+                    'domain': domain,
+                    'status_code': status_code,
+                    'title': title,
+                    'content_length': content_length,
+                    'response_time': response_time,
+                    'headers': headers,
+                    'is_redirected': is_redirected
+                })
+
+        # Prepare results structure
+        results = {
+            "virtual_hosts": processed_urls,
+            "status_code_summary": status_code_counts,
+            "meta": {
+                "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "tool": "Web Application Fuzzer"
+            },
+            "results": results
+        }
+
+        # Save results to file
+        timestamp = dt.now().strftime('%Y%m%d%H%M%S')
+        result_filename = f"virtualhosts_{timestamp}.json"
+        result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
+        with open(result_filepath, 'w') as f:
+            # Compute status summary
+            summary = {
+                "2xx": 0,
+                "3xx": 0,
+                "4xx": 0,
+                "5xx": 0,
+                "redirected": 0
+            }
+
+            for result in results["results"]:
+                code = result.get("status_code", 0)
+
+                if 200 <= code < 300:
+                    summary["2xx"] += 1
+                elif 300 <= code < 400:
+                    summary["3xx"] += 1
+                elif 400 <= code < 500:
+                    summary["4xx"] += 1
+                elif 500 <= code < 600:
+                    summary["5xx"] += 1
+
+                if result.get("is_redirected"):
+                    summary["redirected"] += 1
+
+            # Inject it into the results
+            results["status_code_summary"] = summary
+
+            json.dump(results, f, indent=4)
+
+        # Flash the result to the user
+        flash(f"Virtual host fuzzing completed. Found {status_code_counts['2xx']} accessible virtual hosts, {status_code_counts['redirected']} redirected.", "success")
+        
+        # Return the results page
+        return redirect(url_for('results', filename=result_filename))
+
+    return render_template('virtualhost_fuzzing.html')
+
 
 # Routes
 @app.route('/results_list')
@@ -356,18 +505,28 @@ def results(filename):
         elif 'subdomains' in filename:
             fuzzing_type = "Subdomain"
             processed_results = results_data['subdomains']
+        elif 'virtualhosts' in filename or 'virtual_hosts' in filename:
+            fuzzing_type = "Virtual Host"
+            processed_results = results_data.get('virtual_hosts', [])
         else:
             fuzzing_type = "Unknown"
             processed_results = []
 
         # Calculate status summary
-        status_2xx = sum(1 for r in processed_results if isinstance(r.get('status'), int) and 200 <= r.get('status', 0) < 300)
-        status_3xx = sum(1 for r in processed_results if isinstance(r.get('status'), int) and 300 <= r.get('status', 0) < 400)
-        status_4xx = sum(1 for r in processed_results if isinstance(r.get('status'), int) and 400 <= r.get('status', 0) < 500)
-        status_5xx = sum(1 for r in processed_results if isinstance(r.get('status'), int) and 500 <= r.get('status', 0) < 600)
+        def get_status(result):
+            """Helper to get status from either status or status_code"""
+            if isinstance(result.get('status_code'), int):
+                return result.get('status_code')
+            return result.get('status', 0)
+            
+        status_2xx = sum(1 for r in processed_results if 200 <= get_status(r) < 300)
+        status_3xx = sum(1 for r in processed_results if 300 <= get_status(r) < 400)
+        status_4xx = sum(1 for r in processed_results if 400 <= get_status(r) < 500)
+        status_5xx = sum(1 for r in processed_results if 500 <= get_status(r) < 600)
 
         # Get target URL from meta if available
         target_url = results_data.get('meta', {}).get('target_url', '')
+        print(f"Processed Results: {processed_results}")
 
         return render_template(
             'results.html',

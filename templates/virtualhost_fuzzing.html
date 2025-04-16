@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Virtual Host Fuzzing</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <label for="target_ip">Target IP:</label>
+    <input type="text" name="target_ip" id="target_ip" required><br><br>
+
+    <input type="checkbox" name="use_wordlist" id="use_wordlist" checked>
+    <label for="use_wordlist">Use custom wordlist</label><br>
+
+    <label for="wordlist_file">Upload Wordlist:</label>
+    <input type="file" name="wordlist_file" id="wordlist_file"><br><br>
+
+    <button type="submit">Start Fuzzing</button>
+  </form>
+{% endblock %}

@@ -74,23 +74,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for result in processed_results %}
-                        <tr class="{{ 'table-success' if result.status == 200 
-                            else 'table-info' if 300 <= result.status < 400
-                            else 'table-warning' if 400 <= result.status < 500
-                            else 'table-danger' if result.status >= 500
+                        {% for result in results %}
+                        <tr class="{{ 'table-success' if result.get('status_code', result.get('status', 0)) == 200 
+                            else 'table-info' if 300 <= result.get('status_code', result.get('status', 0)) < 400
+                            else 'table-warning' if 400 <= result.get('status_code', result.get('status', 0)) < 500
+                            else 'table-danger' if 500 <= result.get('status_code', result.get('status', 0)) < 600
                             else '' }}">
-                            <td>{{ result.method }}</td>
-                            <td style="word-break: break-all;">{{ result.url }}</td>
-                            <td>{{ result.status }}</td>
-                            <td>{{ result.size }}</td>
-                            <td>{{ result.response_time }}ms</td>
-                            <td>{{ result.content_type }}</td>
+                            <td>{{ result.get('method', 'GET') }}</td>
+                            <td style="word-break: break-all;">{{ result.get('url', result.get('domain', '')) }}</td>
+                            <td>{{ result.get('status_code', result.get('status', 'N/A')) }}</td>
+                            <td>{{ result.get('size', result.get('content_length', 'N/A')) }}</td>
+                            <td>{{ result.get('response_time', 'N/A') }}{% if result.get('response_time') is not none %}ms{% endif %}</td>
+                            <td>{{ result.get('content_type', result.get('headers', {}).get('Content-Type', 'N/A')) }}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary copy-url" data-url="{{ result.url }}">
+                                <a class="btn btn-sm btn-outline-primary copy-url" data-url="{{ result.get('url', result.get('domain', '')) }}">
                                     Copy URL
-                                </button>
-                                <a href="{{ result.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                </a>
+                                <a href="{{ result.get('url', result.get('domain', '')) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                     Visit
                                 </a>
                             </td>
@@ -107,13 +107,21 @@
 document.querySelectorAll('.copy-url').forEach(button => {
     button.addEventListener('click', function() {
         const url = this.getAttribute('data-url');
-        navigator.clipboard.writeText(url).then(() => {
-            const originalText = this.textContent;
-            this.textContent = 'Copied!';
-            setTimeout(() => {
-                this.textContent = originalText;
-            }, 2000);
-        });
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                const originalClass = this.className;
+                const originalHTML = this.innerHTML;
+                this.className = 'btn btn-success';
+                this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                setTimeout(() => {
+                    this.className = originalClass;
+                    this.innerHTML = originalHTML;
+                }, 1500);
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy URL to clipboard');
+            });
     });
 });
 </script>
@@ -191,74 +199,77 @@ document.querySelectorAll('.copy-url').forEach(button => {
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col">
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="searchInput" placeholder="Search URLs...">
-                            <button class="btn btn-primary" type="button" id="searchButton">
-                                <i class="bi bi-search"></i> Search
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" id="resetButton">
-                                <i class="bi bi-x-circle"></i> Reset
-                            </button>
-                        </div>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search URLs, status codes, etc.">
                     </div>
+                    <div class="col">
+                        <button class="btn btn-primary" type="button" id="searchButton">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" id="resetButton">
+                            <i class="bi bi-x-circle"></i> Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span id="resultCount">Showing {{ total_urls }} of {{ total_urls }} results</span>
                 </div>
             </div>
         </div>
 
         <!-- Results Table -->
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Results</h5>
-                <span class="badge bg-primary" id="resultCount">Showing {{ total_urls }} of {{ total_urls }} results</span>
-                <div>
-                    <a href="{{ url_for('export_csv', filename=filename) }}" class="btn btn-sm btn-success me-2">
-                        <i class="bi bi-download"></i> Export CSV
-                    </a>
-                    <a href="{{ url_for('export_json', filename=filename) }}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-download"></i> Export JSON
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover" id="resultsTable">
-                        <thead>
-                            <tr>
-                                <th style="width: 35%;">URL/Path</th>
-                                <th style="width: 10%;">Status</th>
-                                <th style="width: 10%;">Size</th>
-                                <th style="width: 10%;">Time (ms)</th>
-                                <th style="width: 20%;">Content Type</th>
-                                <th style="width: 15%;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in processed_results %}
-                            <tr>
-                                <td style="word-break: break-all;">{{ result.url }}</td>
-                                <td>{{ result.status }}</td>
-                                <td>{{ result.size }}</td>
-                                <td>{{ result.response_time }}</td>
-                                <td>{{ result.content_type }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ result.url }}" target="_blank" class="btn btn-outline-primary">
-                                            <i class="bi bi-box-arrow-up-right"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-outline-secondary copy-url-btn" data-url="{{ result.url }}">
-                                            <i class="bi bi-clipboard"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Detailed Results</h5>
+        <div>
+            <a href="{{ url_for('download_results', filename=filename) }}" class="btn btn-primary btn-sm">
+                Download Results
+            </a>
         </div>
     </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>URL/Path</th>
+                        <th>Status</th>
+                        <th>Size</th>
+                        <th>Response Time</th>
+                        <th>Content Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr class="{{ 'table-success' if result.get('status_code', result.get('status', 0)) == 200 
+                        else 'table-info' if 300 <= result.get('status_code', result.get('status', 0)) < 400
+                        else 'table-warning' if 400 <= result.get('status_code', result.get('status', 0)) < 500
+                        else 'table-danger' if 500 <= result.get('status_code', result.get('status', 0)) < 600
+                        else '' }}">
+                        <td>{{ result.get('method', 'GET') }}</td>
+                        <td style="word-break: break-all;">{{ result.get('url', result.get('domain', '')) }}</td>
+                        <td>{{ result.get('status_code', result.get('status', 'N/A')) }}</td>
+                        <td>{{ result.get('size', result.get('content_length', 'N/A')) }}</td>
+                        <td>{{ result.get('response_time', 'N/A') }}{% if result.get('response_time') is not none %}ms{% endif %}</td>
+                        <td>{{ result.get('content_type', result.get('headers', {}).get('Content-Type', 'N/A')) }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary copy-url" data-url="{{ result.get('url', result.get('domain', '')) }}">
+                                Copy URL
+                            </a>
+                            <a href="{{ result.get('url', result.get('domain', '')) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                Visit
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -268,14 +279,14 @@ document.querySelectorAll('.copy-url').forEach(button => {
             const searchInput = document.getElementById('searchInput');
             const searchButton = document.getElementById('searchButton');
             const resetButton = document.getElementById('resetButton');
-            const table = document.getElementById('resultsTable');
-            const rows = table.getElementsByTagName('tr');
-            const resultCount = document.getElementById('resultCount');
+            const resultCount = document.getElementById('resultCount') || document.createElement('div');
+            const table = document.querySelector('table');
+            const rows = table ? table.getElementsByTagName('tr') : [];
 
             function filterTable() {
                 const filter = searchInput.value.toLowerCase();
                 let visibleCount = 0;
-                
+
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     const cells = row.getElementsByTagName('td');
@@ -295,8 +306,10 @@ document.querySelectorAll('.copy-url').forEach(button => {
                         row.style.display = 'none';
                     }
                 }
-                
-                resultCount.textContent = `Showing ${visibleCount} of {{ total_urls }} results`;
+
+                if (resultCount) {
+                    resultCount.textContent = `Showing ${visibleCount} of {{ total_urls }} results`;
+                }
             }
 
             searchButton.addEventListener('click', filterTable);
@@ -315,7 +328,7 @@ document.querySelectorAll('.copy-url').forEach(button => {
             });
 
             // Copy URL functionality
-            document.querySelectorAll('.copy-url-btn').forEach(button => {
+            document.querySelectorAll('.copy-url').forEach(button => {
                 button.addEventListener('click', function() {
                     const url = this.getAttribute('data-url');
                     navigator.clipboard.writeText(url)
@@ -323,7 +336,7 @@ document.querySelectorAll('.copy-url').forEach(button => {
                             const originalClass = this.className;
                             const originalHTML = this.innerHTML;
                             this.className = 'btn btn-success';
-                            this.innerHTML = '<i class="bi bi-check"></i>';
+                            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
                             setTimeout(() => {
                                 this.className = originalClass;
                                 this.innerHTML = originalHTML;

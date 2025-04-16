@@ -1,0 +1,6 @@
+example.com
+test.local
+dev.local
+staging.local
+admin.local
+api.local
