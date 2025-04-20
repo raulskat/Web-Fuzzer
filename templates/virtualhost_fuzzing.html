@@ -1,16 +1,30 @@
-{% extends "base.html" %}
+{% extends "base_new.html" %}
+
+{% block title %}Virtual Host Fuzzing{% endblock %}
+
+{% block page_title %}Virtual Host Fuzzing{% endblock %}
+{% block page_subtitle %}Find virtual hosts on target servers{% endblock %}
+
 {% block content %}
-  <h2>Virtual Host Fuzzing</h2>
-  <form method="POST" enctype="multipart/form-data">
-    <label for="target_ip">Target IP:</label>
-    <input type="text" name="target_ip" id="target_ip" required><br><br>
+<form method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="target_ip" class="form-label">Target IP</label>
+        <input type="text" class="form-control" id="target_ip" name="target_ip" required
+               placeholder="10.10.10.10">
+        <div class="form-text">Enter a target IP address to scan for virtual hosts.</div>
+    </div>
 
-    <input type="checkbox" name="use_wordlist" id="use_wordlist" checked>
-    <label for="use_wordlist">Use custom wordlist</label><br>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="use_wordlist" name="use_wordlist" checked>
+        <label class="form-check-label" for="use_wordlist">Use custom wordlist</label>
+    </div>
 
-    <label for="wordlist_file">Upload Wordlist:</label>
-    <input type="file" name="wordlist_file" id="wordlist_file"><br><br>
+    <div class="form-group">
+        <label for="wordlist_file" class="form-label">Virtual Host Wordlist File</label>
+        <input type="file" class="form-control" id="wordlist_file" name="wordlist_file" required>
+        <div class="form-text">Upload a text file with one virtual host per line.</div>
+    </div>
 
-    <button type="submit">Start Fuzzing</button>
-  </form>
+    <button type="submit" class="btn btn-primary">Start Fuzzing</button>
+</form>
 {% endblock %}

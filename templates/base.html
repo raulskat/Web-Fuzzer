@@ -16,6 +16,8 @@
                     <li><a href="{{ url_for('directory_fuzzing') }}" {% if request.endpoint == 'directory_fuzzing' %}class="active"{% endif %}>Directory Fuzzing</a></li>
                     <li><a href="{{ url_for('subdomain_fuzzing') }}" {% if request.endpoint == 'subdomain_fuzzing' %}class="active"{% endif %}>Subdomain Fuzzing</a></li>
                     <li><a href="{{ url_for('api_endpoints_fuzzing') }}" {% if request.endpoint == 'api_endpoints_fuzzing' %}class="active"{% endif %}>API Endpoint Fuzzing</a></li>
+                    <li><a href="{{ url_for('parameter_fuzzing') }}" {% if request.endpoint == 'parameter_fuzzing' %}class="active"{% endif %}>Parameter Fuzzing</a></li>
+                    <li><a href="{{ url_for('virtualhost_fuzzing') }}" {% if request.endpoint == 'virtualhost_fuzzing' %}class="active"{% endif %}>Virtual Host Fuzzing</a></li>
                     <li><a href="{{ url_for('results_list') }}" {% if request.endpoint == 'results_list' %}class="active"{% endif %}>Results</a></li>
                 </ul>
             </nav>

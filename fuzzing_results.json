@@ -3,7 +3,7 @@
         "domain": "example.com",
         "status_code": 200,
         "content_length": 1256,
-        "response_time": 0.528022289276123,
+        "response_time": 0.7440166473388672,
         "headers": {
             "Accept-Ranges": "bytes",
             "Content-Type": "text/html",
@@ -12,8 +12,8 @@
             "Vary": "Accept-Encoding",
             "Content-Encoding": "gzip",
             "Content-Length": "648",
-            "Cache-Control": "max-age=2131",
-            "Date": "Thu, 10 Apr 2025 15:33:35 GMT",
+            "Cache-Control": "max-age=3582",
+            "Date": "Wed, 16 Apr 2025 07:06:14 GMT",
             "Connection": "keep-alive"
         },
         "title": "Example Domain",
@@ -22,44 +22,12 @@
         "is_redirected": false
     },
     {
-        "domain": "api.local",
-        "status_code": 404,
-        "content_length": 2906,
-        "response_time": 0.47704339027404785,
-        "headers": {
-            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
-            "Server": "Kestrel",
-            "Transfer-Encoding": "chunked",
-            "Strict-Transport-Security": "max-age=31536000"
-        },
-        "title": "",
-        "redirect_url": "",
-        "final_url": "",
-        "is_redirected": false
-    },
-    {
         "domain": "test.local",
         "status_code": 404,
         "content_length": 2906,
-        "response_time": 0.47885656356811523,
+        "response_time": 0.5399031639099121,
         "headers": {
-            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
-            "Server": "Kestrel",
-            "Transfer-Encoding": "chunked",
-            "Strict-Transport-Security": "max-age=31536000"
-        },
-        "title": "",
-        "redirect_url": "",
-        "final_url": "",
-        "is_redirected": false
-    },
-    {
-        "domain": "staging.local",
-        "status_code": 404,
-        "content_length": 2906,
-        "response_time": 0.49065470695495605,
-        "headers": {
-            "Date": "Thu, 10 Apr 2025 15:33:35 GMT",
+            "Date": "Wed, 16 Apr 2025 07:06:13 GMT",
             "Server": "Kestrel",
             "Transfer-Encoding": "chunked",
             "Strict-Transport-Security": "max-age=31536000"
@@ -73,9 +41,41 @@
         "domain": "admin.local",
         "status_code": 404,
         "content_length": 2906,
-        "response_time": 0.5011987686157227,
+        "response_time": 0.5454833507537842,
         "headers": {
-            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
+            "Date": "Wed, 16 Apr 2025 07:06:13 GMT",
+            "Server": "Kestrel",
+            "Transfer-Encoding": "chunked",
+            "Strict-Transport-Security": "max-age=31536000"
+        },
+        "title": "",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
+    },
+    {
+        "domain": "api.local",
+        "status_code": 404,
+        "content_length": 2906,
+        "response_time": 0.5433275699615479,
+        "headers": {
+            "Date": "Wed, 16 Apr 2025 07:06:13 GMT",
+            "Server": "Kestrel",
+            "Transfer-Encoding": "chunked",
+            "Strict-Transport-Security": "max-age=31536000"
+        },
+        "title": "",
+        "redirect_url": "",
+        "final_url": "",
+        "is_redirected": false
+    },
+    {
+        "domain": "staging.local",
+        "status_code": 404,
+        "content_length": 2906,
+        "response_time": 0.5403094291687012,
+        "headers": {
+            "Date": "Wed, 16 Apr 2025 07:06:13 GMT",
             "Server": "Kestrel",
             "Transfer-Encoding": "chunked",
             "Strict-Transport-Security": "max-age=31536000"
@@ -89,9 +89,9 @@
         "domain": "dev.local",
         "status_code": 404,
         "content_length": 2906,
-        "response_time": 0.5382018089294434,
+        "response_time": 0.7809178829193115,
         "headers": {
-            "Date": "Thu, 10 Apr 2025 15:33:34 GMT",
+            "Date": "Wed, 16 Apr 2025 07:06:14 GMT",
             "Server": "Kestrel",
             "Transfer-Encoding": "chunked",
             "Strict-Transport-Security": "max-age=31536000"

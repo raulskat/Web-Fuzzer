@@ -22,6 +22,11 @@ class ApiFuzzer:
         self.threads = threads
         self.delay = delay
         self.logger = setup_logger("api_fuzzer",config["logging"]["log_file"])
+        
+        # Progress tracking
+        self.progress_callback = None
+        self.total_endpoints = 0
+        self.current_progress = 0
 
     def load_endpoints(self):
         """Return the endpoints directly (since you're passing it directly)."""
@@ -67,10 +72,33 @@ class ApiFuzzer:
             endpoints = self.load_endpoints()
             if not endpoints:
                 self.logger.error("Endpoints list is empty or could not be loaded.")
+                if self.progress_callback:
+                    self.progress_callback(0, 0, "Error: Endpoints list is empty or could not be loaded.")
                 return []
 
             self.logger.info(f"Starting API fuzzing on {self.base_url}")
+            if self.progress_callback:
+                self.progress_callback(0, 100, f"Starting API fuzzing on {self.base_url}")
+                
             results = []
+            
+            # Calculate total number of requests for progress tracking
+            self.total_endpoints = len(endpoints) * len(self.methods)
+            self.current_progress = 0
+            
+            if self.progress_callback:
+                self.progress_callback(0, self.total_endpoints, f"Preparing to test {self.total_endpoints} endpoint/method combinations")
+
+            # Function to update progress after each endpoint is processed
+            def update_progress():
+                self.current_progress += 1
+                if self.progress_callback:
+                    progress_percentage = int((self.current_progress / self.total_endpoints) * 100)
+                    self.progress_callback(
+                        self.current_progress,
+                        self.total_endpoints,
+                        f"Testing endpoints: {self.current_progress}/{self.total_endpoints} complete ({progress_percentage}%)"
+                    )
 
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
                 future_to_endpoint = {}
@@ -89,13 +117,37 @@ class ApiFuzzer:
                     if result:
                         results.append(result)
 
+                    # Update progress
+                    update_progress()
+                    
                     # Adding delay to avoid overwhelming the target server
                     time.sleep(self.delay)
 
-            self.logger.info(f"Fuzzing completed. Total endpoints tested: {len(endpoints) * len(self.methods)}.")
+            # Log completion
+            self.logger.info(f"Fuzzing completed. Total endpoints tested: {self.total_endpoints}.")
+            
+            # Update progress to 100%
+            if self.progress_callback:
+                valid_count = sum(1 for r in results if r[2] == "valid" if len(r) > 2)
+                self.progress_callback(
+                    self.total_endpoints, 
+                    self.total_endpoints, 
+                    f"Fuzzing completed. Found {valid_count} accessible endpoints."
+                )
+                
             return results
         else:
             print("disabled api_endpoints in config")
+            return []
+            
+    def set_progress_callback(self, callback):
+        """Set a callback function to report progress during fuzzing.
+        The callback should accept three parameters:
+        - completed: number of endpoints processed
+        - total: total number of endpoints to process
+        - message: current status message
+        """
+        self.progress_callback = callback
 
 
 # Example usage

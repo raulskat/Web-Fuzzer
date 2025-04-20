@@ -5,168 +5,747 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Application Fuzzer</title>
     
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=999">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+    <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
     <style>
+    /* Global */
+    body {
+        background-color: #f0f2f5;
+        color: #333;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+    }
+
+    /* Navbar */
+    .navbar {
+        background-color: #1a1a1a;
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .navbar-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .navbar h1 {
+        margin: 0;
+        font-size: 1.6rem;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+    }
+
+    /* Main content */
+    .main-content {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    /* Masonry grid */
+    .masonry-grid {
+        width: 100%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+    }
+
+    /* Card styles */
+    .masonry-card {
+        width: 100%;
+        margin-bottom: 20px;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .masonry-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .masonry-card img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .card-content {
+        padding: 1rem;
+    }
+
+    .card-content h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.2rem;
+        color: #343a40;
+    }
+
+    .card-content p {
+        margin: 0 0 1rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+        background-color: #0069d9;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-details {
+        background-color: #6c757d;
+    }
+
+    .btn-details:hover {
+        background-color: #5a6268;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .masonry-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .masonry-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Additional modern styling */
+    .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+        font-size: 2.8rem;
+        margin-bottom: 0.8rem;
+        color: #1a1a1a;
+        font-weight: 600;
+        letter-spacing: -1px;
+    }
+
+    .section-header .lead {
+        font-size: 1.3rem;
+        color: #666;
+        margin-bottom: 10px;
+        font-weight: 400;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .fuzzer-section {
+        padding: 30px 0 60px;
+    }
+
+    @media (max-width: 768px) {
+        .section-header h2 {
+            font-size: 2.2rem;
+        }
+        
+        .section-header .lead {
+            font-size: 1.1rem;
+        }
+        
+        .fuzzer-section {
+            padding: 20px 0 40px;
+        }
+    }
+
     /* Home Page Add-On */
 
-/* Refined Navbar for Home Page */
-.home-theme .navbar {
-  padding: 0.75rem 1.5rem;
-}
+    /* Refined Navbar for Home Page */
+    .home-theme .navbar {
+      padding: 0.75rem 1.5rem;
+    }
 
-.home-theme .navbar-brand {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  text-decoration: none;
-}
+    .home-theme .navbar-brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
 
-.home-theme .navbar-links {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
+    .home-theme .navbar-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
 
-.home-theme .navbar-link {
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 0;
-  position: relative;
-  transition: color 0.3s ease;
-}
+    .home-theme .navbar-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 0;
+      position: relative;
+      transition: color 0.3s ease;
+    }
 
-.home-theme .navbar-link:hover,
-.home-theme .navbar-link.active {
-  color: var(--accent-color);
-}
+    .home-theme .navbar-link:hover,
+    .home-theme .navbar-link.active {
+      color: var(--accent-color);
+    }
 
-.home-theme .navbar-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background-color: var(--accent-color);
-  transition: width 0.3s ease;
-}
+    .home-theme .navbar-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--accent-color);
+      transition: width 0.3s ease;
+    }
 
-.home-theme .navbar-link:hover::after,
-.home-theme .navbar-link.active::after {
-  width: 100%;
-}
+    .home-theme .navbar-link:hover::after,
+    .home-theme .navbar-link.active::after {
+      width: 100%;
+    }
 
-/* Masonry Card Layout for Home Page */
-/* Use auto-fit so cards expand when there's extra space */
-.home-theme .gallery-masonry {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
+    /* Card variations for visual interest */
+    .masonry-card.highlight {
+      border-top: 4px solid #3498db;
+    }
 
-/* Card Styles */
-.home-theme .gallery-masonry .card {
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
+    .masonry-card.alt-color .card-icon {
+      color: #e74c3c;
+    }
 
-/* Card Hover - Glowing Border Effect */
-.home-theme .gallery-masonry .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--glass-border), 0 0 0 4px var(--accent-shadow);
-}
-</style>
+    .masonry-card.alt-color .btn {
+      background-color: #e74c3c;
+    }
+
+    .masonry-card.alt-color .btn:hover {
+      background-color: #c0392b;
+    }
+
+    .masonry-card.third-color .card-icon {
+      color: #2ecc71;
+    }
+
+    .masonry-card.third-color .btn {
+      background-color: #2ecc71;
+    }
+
+    .masonry-card.third-color .btn:hover {
+      background-color: #27ae60;
+    }
+
+    .masonry-card.fourth-color .card-icon {
+      color: #9b59b6;
+    }
+
+    .masonry-card.fourth-color .btn {
+      background-color: #9b59b6;
+    }
+
+    .masonry-card.fourth-color .btn:hover {
+      background-color: #8e44ad;
+    }
+
+    .masonry-card.fifth-color .card-icon {
+      color: #f39c12;
+    }
+
+    .masonry-card.fifth-color .btn {
+      background-color: #f39c12;
+    }
+
+    .masonry-card.fifth-color .btn:hover {
+      background-color: #d35400;
+    }
+
+    .masonry-card.sixth-color .card-icon {
+      color: #1abc9c;
+    }
+
+    .masonry-card.sixth-color .btn {
+      background-color: #1abc9c;
+    }
+
+    .masonry-card.sixth-color .btn:hover {
+      background-color: #16a085;
+    }
+
+    /* Enhanced card styles */
+    .masonry-card .card-icon {
+      font-size: 2rem;
+      margin: 10px 0;
+      color: #3498db;
+      align-self: center;
+      padding: 5px 0;
+    }
+
+    .masonry-card .card-footer {
+      padding: 10px 15px;
+      margin-top: auto;
+      border-top: 1px solid #eee;
+      background-color: #f9f9f9;
+    }
+
+    /* Navbar styles for links */
+    .navbar-links {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .navbar-link {
+        color: rgba(255, 255, 255, 0.85);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        padding: 0.5rem 0;
+        position: relative;
+        transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .navbar-link:after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: #fff;
+        transition: width 0.25s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .navbar-link:hover {
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .navbar-link:hover:after,
+    .navbar-link.active:after {
+        width: 100%;
+    }
+
+    .navbar-link.active {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* Responsive navbar */
+    @media (max-width: 992px) {
+        .navbar-content {
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+        }
+        
+        .navbar-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .section-header h2 {
+            font-size: 2.2rem;
+        }
+        
+        .section-header .lead {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .navbar-link {
+            font-size: 0.85rem;
+            padding: 0.3rem 0;
+        }
+        
+        .navbar-links {
+            gap: 0.8rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+        }
+        
+        .metro-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .metro-tile.wide {
+            grid-column: auto;
+        }
+        
+        .metro-tile.tall {
+            grid-row: auto;
+            height: 200px;
+        }
+    }
+
+    /* Windows 8 Metro UI Styles */
+    .metro-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: 180px;
+        grid-gap: 16px;
+        margin: 20px auto;
+    }
+
+    .metro-tile {
+        position: relative;
+        overflow: hidden;
+        border: 0;
+        border-radius: 8px;
+        color: #333333;
+        padding: 20px;
+        text-align: left;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+
+    .metro-tile::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: none !important;
+        opacity: 0;
+        z-index: 1;
+    }
+
+    .metro-tile:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .metro-tile:hover::before {
+        opacity: 0;
+    }
+
+    .metro-tile.wide {
+        grid-column: span 2;
+    }
+
+    .metro-tile.tall {
+        grid-row: span 2;
+    }
+
+    .metro-tile .tile-icon {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 2.5rem;
+        opacity: 0.8;
+        z-index: 2;
+        transition: transform 0.3s ease;
+        color: #555555;
+    }
+
+    .metro-tile:hover .tile-icon {
+        transform: scale(1.1);
+    }
+
+    .metro-tile .tile-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        z-index: 2;
+        position: relative;
+        color: #333333;
+    }
+
+    .metro-tile .tile-description {
+        font-size: 0.95rem;
+        margin: 0;
+        opacity: 0.9;
+        max-height: 2.8em;
+        overflow: hidden;
+        z-index: 2;
+        position: relative;
+        color: #555555;
+    }
+
+    /* Modern Metro colors - REMOVING ALL BACKGROUND COLORS */
+    .metro-blue { 
+        background: #ffffff !important;
+        border-left: 8px solid #0066cc;
+    }
+    .metro-red { 
+        background: #ffffff !important;
+        border-left: 8px solid #cc0000;
+    }
+    .metro-green { 
+        background: #ffffff !important;
+        border-left: 8px solid #00cc66;
+    }
+    .metro-purple { 
+        background: #ffffff !important;
+        border-left: 8px solid #6600cc;
+    }
+    .metro-orange { 
+        background: #ffffff !important;
+        border-left: 8px solid #cc6600;
+    }
+    .metro-teal { 
+        background: #ffffff !important;
+        border-left: 8px solid #00cccc;
+    }
+    .metro-lime { 
+        background: #ffffff !important;
+        border-left: 8px solid #88cc00;
+    }
+    .metro-magenta { 
+        background: #ffffff !important;
+        border-left: 8px solid #cc0088;
+    }
+    .metro-brown { 
+        background: #ffffff !important;
+        border-left: 8px solid #a05000;
+    }
+    .metro-pink { 
+        background: #ffffff !important;
+        border-left: 8px solid #e671b8;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .metro-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .navbar-content {
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+        }
+        
+        .navbar-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .section-header h2 {
+            font-size: 2.2rem;
+        }
+        
+        .section-header .lead {
+            font-size: 1.1rem;
+        }
+        
+        .metro-grid {
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 12px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .metro-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .metro-tile.wide {
+            grid-column: auto;
+        }
+        
+        .metro-tile.tall {
+            grid-row: auto;
+            height: 200px;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+        }
+        
+        .navbar-link {
+            font-size: 0.85rem;
+            padding: 0.3rem 0;
+        }
+    }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container">
+    <nav class="navbar">
+        <div class="navbar-content">
             <h1>Web Fuzzer</h1>
-            <nav>
-                <ul>
-                    <li><a href="{{ url_for('index') }}" class="active">Home</a></li>
-                    <li><a href="{{ url_for('directory_fuzzing') }}">Directory Fuzzing</a></li>
-                    <li><a href="{{ url_for('subdomain_fuzzing') }}">Subdomain Fuzzing</a></li>
-                    <li><a href="{{ url_for('api_endpoints_fuzzing') }}">API Endpoint Fuzzing</a></li>
-                    <li><a href="{{ url_for('results_list') }}">Results</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <main class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <section class="fuzzer-section">
-            <h2>Welcome to Web Application Fuzzer</h2>
-            <p>A comprehensive tool for web security testing and discovery.</p>
-            <p>Choose a fuzzing operation to begin:</p>
-            <div class="card-container">
-                <div class="card">
-                    <h3>Directory Fuzzing</h3>
-                    <p>Discover hidden directories and files on web servers.</p>
-                    <a href="{{ url_for('directory_fuzzing') }}" class="btn btn-primary">Start Directory Fuzzing</a>
-                </div>
-                
-                <div class="card">
-                    <h3>Subdomain Fuzzing</h3>
-                    <p>Find subdomains of a target domain.</p>
-                    <a href="{{ url_for('subdomain_fuzzing') }}" class="btn btn-primary">Start Subdomain Fuzzing</a>
-                </div>
-                
-                <div class="card">
-                    <h3>API Endpoint Fuzzing</h3>
-                    <p>Discover hidden API endpoints on web applications.</p>
-                    <a href="{{ url_for('api_endpoints_fuzzing') }}" class="btn btn-primary">Start API Endpoint Fuzzing</a>
-                </div>
-                
-                
-                <div class="card">
-                    <h3>Results</h3>
-                    <p>View and analyze previous fuzzing operation results.</p>
-                    <a href="{{ url_for('results_list') }}" class="btn btn-primary">View Results</a>
-                </div>
+            <div class="navbar-links">
+                <a href="{{ url_for('index') }}" class="navbar-link active">Home</a>
+                <a href="{{ url_for('directory_fuzzing') }}" class="navbar-link">Directory Fuzzing</a>
+                <a href="{{ url_for('subdomain_fuzzing') }}" class="navbar-link">Subdomain Fuzzing</a>
+                <a href="{{ url_for('api_endpoints_fuzzing') }}" class="navbar-link">API Fuzzing</a>
+                <a href="{{ url_for('virtualhost_fuzzing') }}" class="navbar-link">Virtual Host Fuzzing</a>
+                <a href="{{ url_for('parameter_fuzzing') }}" class="navbar-link">Parameter Fuzzing</a>
+                <a href="{{ url_for('results_list') }}" class="navbar-link">View Results</a>
             </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; Web Fuzzer Tool</p>
         </div>
-    </footer>
+    </nav>
+
+    <div class="main-content">
+        <div class="section-header">
+            <h2>Web Fuzzing Suite</h2>
+            <p class="lead">Advanced tools for web application security testing</p>
+        </div>
+        
+        <div class="metro-grid">
+            <!-- Directory Fuzzing Tile - Wide -->
+            <a href="{{ url_for('directory_fuzzing') }}" class="metro-tile metro-blue wide" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #0066cc;">
+                <i class="fa fa-folder-open tile-icon"></i>
+                <h3 class="tile-title">Directory Fuzzing</h3>
+                <p class="tile-description">Discover hidden directories and files on web servers</p>
+            </a>
+
+            <!-- Subdomain Fuzzing Tile -->
+            <a href="{{ url_for('subdomain_fuzzing') }}" class="metro-tile metro-red" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #cc0000;">
+                <i class="fa fa-sitemap tile-icon"></i>
+                <h3 class="tile-title">Subdomain Fuzzing</h3>
+                <p class="tile-description">Enumerate subdomains</p>
+            </a>
+
+            <!-- API Endpoints Fuzzing Tile - Tall -->
+            <a href="{{ url_for('api_endpoints_fuzzing') }}" class="metro-tile metro-green tall" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #00cc66;">
+                <i class="fa fa-plug tile-icon"></i>
+                <h3 class="tile-title">API Endpoints</h3>
+                <p class="tile-description">Discover hidden API endpoints</p>
+            </a>
+
+            <!-- Virtual Host Fuzzing Tile -->
+            <a href="{{ url_for('virtualhost_fuzzing') }}" class="metro-tile metro-purple" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #6600cc;">
+                <i class="fa fa-server tile-icon"></i>
+                <h3 class="tile-title">Virtual Host</h3>
+                <p class="tile-description">Find virtual hosts</p>
+            </a>
+
+            <!-- Parameter Fuzzing Tile - Wide -->
+            <a href="{{ url_for('parameter_fuzzing') }}" class="metro-tile metro-orange wide" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #cc6600;">
+                <i class="fa fa-code tile-icon"></i>
+                <h3 class="tile-title">Parameter Fuzzing</h3>
+                <p class="tile-description">Test parameters for vulnerabilities</p>
+            </a>
+
+            <!-- Results Dashboard Tile - Wide and Tall -->
+            <a href="{{ url_for('results_list') }}" class="metro-tile metro-teal wide tall" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #00cccc;">
+                <i class="fa fa-table tile-icon"></i>
+                <h3 class="tile-title">Results Dashboard</h3>
+                <p class="tile-description">View and analyze all fuzzing results</p>
+            </a>
+            
+            <!-- Future Use Tiles -->
+            <a href="#" class="metro-tile metro-lime" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #88cc00;">
+                <i class="fa fa-flask tile-icon"></i>
+                <h3 class="tile-title">Scan History</h3>
+                <p class="tile-description">Coming soon</p>
+            </a>
+            
+            <a href="{{ url_for('settings') }}" class="metro-tile metro-magenta" style="background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; border-left: 8px solid #cc0088;">
+                <i class="fa fa-cog tile-icon"></i>
+                <h3 class="tile-title">Settings</h3>
+                <p class="tile-description">Configure application</p>
+            </a>
+        </div>
+    </div>
 
     <script>
+        // Initialize Masonry layout with imagesLoaded integration
+        var grid = document.querySelector('.masonry-grid');
+        var msnry = new Masonry(grid, {
+            itemSelector: '.masonry-card',
+            columnWidth: '.masonry-card',
+            percentPosition: true,
+            gutter: 20,
+            initLayout: false
+        });
+
+        // Debounce function to limit layout recalculations
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        // Load images and trigger layout
+        imagesLoaded(grid).on('progress', debounce(function() {
+            msnry.layout();
+        }, 100));
+
+        // Add event listener for window resize
+        window.addEventListener('resize', debounce(function() {
+            msnry.layout();
+        }, 150));
+
+        // Call layout once all images are loaded
+        imagesLoaded(grid).on('done', function() {
+            msnry.layout();
+        });
+        
+        // Force style overrides
         document.addEventListener('DOMContentLoaded', function() {
-            // Card height normalization
-            const cards = document.querySelectorAll('.card');
-            let maxHeight = 0;
-            
-            // Find max height
-            cards.forEach(card => {
-                if (card.offsetHeight > maxHeight) {
-                    maxHeight = card.offsetHeight;
-                }
+            // Apply white background to all metro tiles
+            document.querySelectorAll('.metro-tile').forEach(function(tile) {
+                tile.style.backgroundColor = '#ffffff';
+                tile.style.color = '#333333';
+                tile.style.border = 'none';
             });
             
-            // Set all cards to max height
-            cards.forEach(card => {
-                card.style.height = maxHeight + 'px';
+            // Apply specific border colors
+            document.querySelectorAll('.metro-blue').forEach(function(tile) {
+                tile.style.borderLeft = '8px solid #0066cc';
+            });
+            document.querySelectorAll('.metro-red').forEach(function(tile) {
+                tile.style.borderLeft = '8px solid #cc0000';
+            });
+            document.querySelectorAll('.metro-green').forEach(function(tile) {
+                tile.style.borderLeft = '8px solid #00cc66';
+            });
+            document.querySelectorAll('.metro-purple').forEach(function(tile) {
+                tile.style.borderLeft = '8px solid #6600cc';
+            });
+            document.querySelectorAll('.metro-orange').forEach(function(tile) {
+                tile.style.borderLeft = '8px solid #cc6600';
+            });
+            document.querySelectorAll('.metro-teal').forEach(function(tile) {
+                tile.style.borderLeft = '8px solid #00cccc';
             });
         });
     </script>

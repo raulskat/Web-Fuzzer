@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime as dt
-from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory, make_response
+from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory, make_response, jsonify
 from werkzeug.utils import secure_filename
 from urllib.parse import urlparse
 import os
@@ -12,22 +12,146 @@ from io import StringIO
 import requests
 import asyncio
 import aiohttp
+import shutil
+import uuid
 from src.fuzzing.directories import DirectoryFuzzer
 from src.fuzzing.subdomains import SubdomainFuzzer
 from src.fuzzing.api_endpoints import ApiFuzzer
 from src.utils.request_handler import RequestHandler
+from src.fuzzing.parameters import ParameterFuzzer
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['RESULT_FOLDER'] = 'results'
+app.config['CONFIG_FILE'] = 'config/current_config.json'
+app.config['DEFAULT_CONFIG_FILE'] = 'config/default_config.json'
 app.secret_key = 'your-secret-key'  # Change this in production
+
+# Global variable to track fuzzing progress
+fuzzing_tasks = {}
+
+# Helper classes for progress tracking
+class FuzzingProgress:
+    def __init__(self, task_id, task_type, total=100):
+        self.task_id = task_id
+        self.task_type = task_type  # "directory", "subdomain", "api", "parameter", "virtualhost"
+        self.total = total
+        self.completed = 0
+        self.status = "running"  # "running", "completed", "error"
+        self.message = "Initializing..."
+        self.results = None
+        self.start_time = dt.now()
+    
+    def update(self, completed, message=None):
+        self.completed = completed
+        if message:
+            self.message = message
+    
+    def complete(self, results=None):
+        self.completed = self.total
+        self.status = "completed"
+        self.message = "Fuzzing completed"
+        self.results = results
+        
+    def error(self, message):
+        self.status = "error"
+        self.message = message
+    
+    def to_dict(self):
+        elapsed = (dt.now() - self.start_time).total_seconds()
+        return {
+            "task_id": self.task_id,
+            "task_type": self.task_type,
+            "progress": int((self.completed / self.total) * 100) if self.total > 0 else 0,
+            "status": self.status,
+            "message": self.message,
+            "elapsed": elapsed
+        }
 
 # Create directories
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
+os.makedirs('config', exist_ok=True)
+
 # Helper functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'txt'}
+
+def load_config():
+    """Load configuration from file or create from default if it doesn't exist"""
+    if not os.path.exists(app.config['CONFIG_FILE']):
+        # If config doesn't exist, copy the default
+        if os.path.exists(app.config['DEFAULT_CONFIG_FILE']):
+            shutil.copy(app.config['DEFAULT_CONFIG_FILE'], app.config['CONFIG_FILE'])
+        else:
+            # Create a basic default config if even the default doesn't exist
+            default_config = {
+                "target_url": "https://demo.owasp-juice.shop",
+                "target_domain": "github.com",
+                "directories": {
+                    "enabled": True,
+                    "wordlist": "wordlists/directory_wordlist.txt"
+                },
+                "subdomains": {
+                    "enabled": True,
+                    "wordlist": "wordlists/subdomain_wordlist.txt"
+                },
+                "api_endpoints": {
+                    "enabled": True,
+                    "wordlist": "wordlists/api_endpoints.txt"
+                },
+                "parameter_fuzzing": {
+                    "enabled": True,
+                    "wordlist": "wordlists/parameter_wordlist.txt"
+                },
+                "request_options": {
+                    "method": "GET",
+                    "timeout": 10,
+                    "retries": 3
+                },
+                "rate_limiting": {
+                    "enabled": True,
+                    "requests_per_second": 5
+                },
+                "logging": {
+                    "enabled": True,
+                    "log_file": "fuzzer_log.log"
+                }
+            }
+            with open(app.config['CONFIG_FILE'], 'w') as f:
+                json.dump(default_config, f, indent=4)
+    
+    # Load and return the config
+    try:
+        with open(app.config['CONFIG_FILE'], 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        app.logger.error(f"Error loading config: {str(e)}")
+        # Return a basic config in case of error
+        return {
+            "target_url": "https://example.com",
+            "target_domain": "example.com",
+            "directories": {"enabled": True},
+            "subdomains": {"enabled": True},
+            "api_endpoints": {"enabled": True},
+            "parameter_fuzzing": {"enabled": True},
+            "request_options": {"method": "GET", "timeout": 10, "retries": 3},
+            "rate_limiting": {"enabled": True, "requests_per_second": 5},
+            "logging": {"enabled": True, "log_file": "fuzzer_log.log"}
+        }
+
+def save_config(config_data):
+    """Save configuration to file"""
+    try:
+        with open(app.config['CONFIG_FILE'], 'w') as f:
+            json.dump(config_data, f, indent=4)
+        return True
+    except Exception as e:
+        app.logger.error(f"Error saving config: {str(e)}")
+        return False
+
+# Load initial configuration
+app_config = load_config()
 
 @app.route('/')
 def index():
@@ -40,6 +164,7 @@ def directory_fuzzing():
     if request.method == 'POST':
         target_url = request.form.get('target_url', '').strip()
         use_wordlist = request.form.get('use_wordlist') == 'on'
+        use_ai = request.form.get('use_ai') == 'on'
         wordlist_file = request.files.get('wordlist_file')
         verify_ssl = request.form.get('verify_ssl') == 'on'
 
@@ -50,71 +175,111 @@ def directory_fuzzing():
 
         if not target_url.startswith(('http://', 'https://')):
             target_url = f"https://{target_url}"
-
-        # Generate timestamp for results file
-        timestamp = dt.now().strftime('%Y%m%d%H%M%S')
-        result_filename = f"directories_{timestamp}.json"
-        result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
-
+            
+        # Generate a unique task ID
+        task_id = str(uuid.uuid4())
+        
+        # Determine wordlist source
+        if use_ai:
+            wordlist_source = "ai"
+            flash(f"Using AI to generate a targeted wordlist for {target_url}...", "info")
+        elif use_wordlist and wordlist_file and allowed_file(wordlist_file.filename):
+            wordlist_source = "custom"
+        else:
+            wordlist_source = "predefined"
+        
         # Process wordlist
         custom_wordlist_path = None
         if use_wordlist and wordlist_file and allowed_file(wordlist_file.filename):
             filename = secure_filename(wordlist_file.filename)
             custom_wordlist_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             wordlist_file.save(custom_wordlist_path)
-
-        # Initialize directory fuzzer
-        fuzzer = DirectoryFuzzer(
-            target_url=target_url,
-            wordlist_source="predefined",
-            custom_wordlist_path=custom_wordlist_path,
-            verify_ssl=verify_ssl
-        )
+            
+        # Create and store progress tracker
+        progress = FuzzingProgress(task_id, "directory")
+        fuzzing_tasks[task_id] = progress
+        
+        # Generate timestamp for results file
+        timestamp = dt.now().strftime('%Y%m%d%H%M%S')
+        result_filename = f"directories_{timestamp}.json"
+        result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
+        
+        # Start fuzzing in a background thread
+        import threading
+        def run_fuzzing():
+            try:
+                # Initialize directory fuzzer
+                fuzzer = DirectoryFuzzer(
+                    target_url=target_url,
+                    wordlist_source=wordlist_source,
+                    custom_wordlist_path=custom_wordlist_path,
+                    verify_ssl=verify_ssl
+                )
+                
+                # Set the progress callback
+                fuzzer.set_progress_callback(lambda completed, total, message: 
+                    progress.update(completed, message))
+                
+                # Run the fuzzing
+                processed_urls = fuzzer.fuzz_directories()
+                
+                # Calculate statistics
+                total_urls = len(processed_urls)
+                def get_status(result):
+                    """Helper to get status from either status or status_code"""
+                    if isinstance(result.get('status_code'), int):
+                        return result.get('status_code')
+                    return result.get('status', 0)
+                    
+                status_2xx = sum(1 for r in processed_urls if 200 <= get_status(r) < 300)
+                status_3xx = sum(1 for r in processed_urls if 300 <= get_status(r) < 400)
+                status_4xx = sum(1 for r in processed_urls if 400 <= get_status(r) < 500)
+                status_5xx = sum(1 for r in processed_urls if 500 <= get_status(r) < 600)
+                
+                # Prepare results structure
+                results = {
+                    "directories": processed_urls,
+                    "subdomains": [],
+                    "api_endpoints": [],
+                    "meta": {
+                        "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        "tool": "Web Application Fuzzer",
+                        "target_url": target_url,
+                        "total_urls": total_urls,
+                        "ssl_verification": verify_ssl,
+                        "wordlist_source": wordlist_source,
+                        "status_summary": {
+                            "2xx": status_2xx,
+                            "3xx": status_3xx,
+                            "4xx": status_4xx,
+                            "5xx": status_5xx
+                        }
+                    }
+                }
+                
+                # Save results
+                with open(result_filepath, 'w') as f:
+                    json.dump(results, f, indent=4)
+                
+                # Update progress
+                progress.complete(results)
+                progress.message = f"Directory fuzzing completed. Found {status_2xx + status_3xx} accessible directories."
+                
+            except Exception as e:
+                app.logger.error(f"Error during directory fuzzing: {str(e)}")
+                progress.error(f"Error during fuzzing: {str(e)}")
+        
+        # Start the thread
+        threading.Thread(target=run_fuzzing).start()
         
         flash(f"Starting directory fuzzing on {target_url}. This may take a moment...", "info")
         
-        # Run the fuzzing
-        processed_urls = fuzzer.fuzz_directories()
-
-        # Calculate statistics
-        total_urls = len(processed_urls)
-        def get_status(result):
-            """Helper to get status from either status or status_code"""
-            if isinstance(result.get('status_code'), int):
-                return result.get('status_code')
-            return result.get('status', 0)
-            
-        status_2xx = sum(1 for r in processed_urls if 200 <= get_status(r) < 300)
-        status_3xx = sum(1 for r in processed_urls if 300 <= get_status(r) < 400)
-        status_4xx = sum(1 for r in processed_urls if 400 <= get_status(r) < 500)
-        status_5xx = sum(1 for r in processed_urls if 500 <= get_status(r) < 600)
-
-        # Prepare results structure
-        results = {
-            "directories": processed_urls,
-            "subdomains": [],
-            "api_endpoints": [],
-            "meta": {
-                "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S'),
-                "tool": "Web Application Fuzzer",
-                "target_url": target_url,
-                "total_urls": total_urls,
-                "ssl_verification": verify_ssl,
-                "status_summary": {
-                    "2xx": status_2xx,
-                    "3xx": status_3xx,
-                    "4xx": status_4xx,
-                    "5xx": status_5xx
-                }
-            }
-        }
-
-        # Save results
-        with open(result_filepath, 'w') as f:
-            json.dump(results, f, indent=4)
-
-        flash(f"Directory fuzzing completed. Found {status_2xx + status_3xx} accessible directories.", "success")
-        return redirect(url_for('results', filename=result_filename))
+        # Return the task ID for the client to poll progress
+        return render_template('fuzzing_progress.html', 
+                             task_id=task_id, 
+                             task_type="directory",
+                             target=target_url,
+                             result_filename=result_filename)
 
     return render_template('directory_fuzzing.html')
 
@@ -252,83 +417,116 @@ def api_endpoints_fuzzing():
         timestamp = dt.now().strftime('%Y%m%d%H%M%S')
         result_filename = f"api_endpoints_{timestamp}.json"
         result_filepath = os.path.join(app.config['RESULT_FOLDER'], result_filename)
-
-        # Initialize API fuzzer
-        fuzzer = ApiFuzzer(
-            base_url=target_url,
-            endpoints=endpoints,
-            methods=http_methods,
-            threads=5,
-            delay=0.5,
-            verify_ssl=verify_ssl
-        )
-
-        flash(f"Making HTTP requests to {len(endpoints)} API endpoints with {len(http_methods)} HTTP methods. This may take a moment...", "info")
-
-        # Run the fuzzing
-        fuzzing_results = fuzzer.fuzz_api_endpoints()
         
-        # Convert results to the expected dictionary format
-        processed_urls = []
-        for result in fuzzing_results:
-            if result:
-                url, method, status_text = result
-                # Convert the tuple result to dictionary format
-                result_dict = {
-                    'url': url,
-                    'method': method,
-                    'status': 200 if status_text == 'valid' else 
-                              403 if status_text == 'forbidden' else 
-                              404 if status_text == 'not_found' else 
-                              500 if status_text == 'server_error' else 0,
-                    'size': 'N/A',
-                    'response_time': 'N/A',
-                    'content_type': 'N/A',
-                    'auth_required': status_text == 'forbidden'
-                }
-                processed_urls.append(result_dict)
+        app.logger.info(f"API endpoints fuzzing for {target_url} with {len(endpoints)} endpoints using {', '.join(http_methods)} methods")
+        
+        # Generate a unique task ID for progress tracking
+        task_id = str(uuid.uuid4())
+        
+        # Create and store progress tracker
+        progress = FuzzingProgress(task_id, "api_endpoint", total=len(endpoints) * len(http_methods))
+        fuzzing_tasks[task_id] = progress
+        
+        # Start fuzzing in a background thread
+        import threading
+        def run_fuzzing():
+            try:
+                # Initialize API fuzzer
+                fuzzer = ApiFuzzer(
+                    base_url=target_url,
+                    endpoints=endpoints,
+                    methods=http_methods,
+                    threads=5,
+                    delay=0.5,
+                    verify_ssl=verify_ssl
+                )
                 
-        # Calculate statistics
-        total_urls = len(processed_urls)
-        def get_status(result):
-            """Helper to get status from either status or status_code"""
-            if isinstance(result.get('status_code'), int):
-                return result.get('status_code')
-            return result.get('status', 0)
-            
-        status_2xx = sum(1 for r in processed_urls if 200 <= get_status(r) < 300)
-        status_3xx = sum(1 for r in processed_urls if 300 <= get_status(r) < 400)
-        status_4xx = sum(1 for r in processed_urls if 400 <= get_status(r) < 500)
-        status_5xx = sum(1 for r in processed_urls if 500 <= get_status(r) < 600)
-        auth_required = sum(1 for r in processed_urls if r.get('auth_required', False))
+                # Set the progress callback
+                fuzzer.set_progress_callback(lambda completed, total, message: 
+                    progress.update(completed, message))
+                
+                # Run the fuzzing
+                fuzzing_results = fuzzer.fuzz_api_endpoints()
+                
+                # Convert results to the expected dictionary format
+                processed_urls = []
+                for result in fuzzing_results:
+                    if result:
+                        url, method, status_text = result
+                        status_code = 200 if status_text == 'valid' else (
+                                    403 if status_text == 'forbidden' else 
+                                    404 if status_text == 'not_found' else 
+                                    500 if status_text == 'server_error' else 0)
+                                    
+                        # Convert the tuple result to dictionary format
+                        result_dict = {
+                            'url': url,
+                            'method': method,
+                            'status': status_code,
+                            'status_text': status_text,
+                            'size': 'N/A',
+                            'response_time': 'N/A',
+                            'content_type': 'N/A',
+                            'auth_required': status_text == 'forbidden'
+                        }
+                        processed_urls.append(result_dict)
+                        
+                # Calculate statistics
+                total_urls = len(processed_urls)
+                def get_status(result):
+                    """Helper to get status from either status or status_code"""
+                    return result.get('status', 0)
+                    
+                status_2xx = sum(1 for r in processed_urls if 200 <= get_status(r) < 300)
+                status_3xx = sum(1 for r in processed_urls if 300 <= get_status(r) < 400)
+                status_4xx = sum(1 for r in processed_urls if 400 <= get_status(r) < 500)
+                status_5xx = sum(1 for r in processed_urls if 500 <= get_status(r) < 600)
+                auth_required = sum(1 for r in processed_urls if r.get('auth_required', False))
 
-        # Prepare results structure
-        results = {
-            "directories": [],
-            "subdomains": [],
-            "api_endpoints": processed_urls,
-            "meta": {
-                "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S'),
-                "tool": "Web Application Fuzzer",
-                "target_url": target_url,
-                "total_urls": total_urls,
-                "http_methods": http_methods,
-                "status_summary": {
-                    "2xx": status_2xx,
-                    "3xx": status_3xx,
-                    "4xx": status_4xx,
-                    "5xx": status_5xx,
-                    "auth_required": auth_required
+                # Prepare results structure
+                results = {
+                    "meta": {
+                        "timestamp": dt.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        "tool": "Web Application Fuzzer",
+                        "target_url": target_url,
+                        "total_endpoints": len(endpoints),
+                        "http_methods": http_methods,
+                        "status_summary": {
+                            "2xx": status_2xx,
+                            "3xx": status_3xx,
+                            "4xx": status_4xx,
+                            "5xx": status_5xx,
+                            "auth_required": auth_required
+                        }
+                    },
+                    "api_endpoints": processed_urls
                 }
-            }
-        }
 
-        # Save results
-        with open(result_filepath, 'w') as f:
-            json.dump(results, f, indent=4)
-
-        flash(f"API endpoint fuzzing completed. Found {status_2xx} accessible endpoints, {auth_required} requiring authentication.", "success")
-        return redirect(url_for('results', filename=result_filename))
+                # Save results
+                with open(result_filepath, 'w') as f:
+                    json.dump(results, f, indent=4)
+                
+                app.logger.info(f"API endpoints fuzzing completed for {target_url}. Saved to {result_filepath}")
+                
+                # Set progress to complete with results
+                progress.complete(results)
+                
+            except Exception as e:
+                error_msg = f"Error during API endpoints fuzzing: {str(e)}"
+                app.logger.error(error_msg)
+                progress.error(error_msg)
+        
+        # Start the background thread
+        threading.Thread(target=run_fuzzing).start()
+        
+        flash(f"Starting API endpoint fuzzing for {target_url}. This may take a moment...", "info")
+        
+        # Redirect to a page that will show the progress and eventually the results
+        return render_template('fuzzing_progress.html', 
+                              task_id=task_id, 
+                              task_type="API Endpoint", 
+                              target=target_url,
+                              result_filename=result_filename)
 
     return render_template('api_endpoints_fuzzing.html')
 
@@ -462,6 +660,96 @@ def virtualhost_fuzzing():
 
     return render_template('virtualhost_fuzzing.html')
 
+@app.route('/parameter_fuzzing', methods=['GET', 'POST'])
+def parameter_fuzzing():
+    if request.method == 'POST':
+        # Get the target URL from the form
+        target_url = request.form.get('target_url', '')
+        
+        # Log the received URL
+        app.logger.info(f"Parameter fuzzing requested for URL: {target_url}")
+        
+        # Validate URL
+        if not target_url:
+            flash('Please enter a target URL.', 'error')
+            return render_template('parameter_fuzzing.html')
+        
+        # Add https:// if no protocol specified
+        if not target_url.startswith('http://') and not target_url.startswith('https://'):
+            target_url = 'https://' + target_url
+            app.logger.info(f"Added HTTPS protocol to URL: {target_url}")
+        
+        # Generate timestamp for results file
+        timestamp = dt.now().strftime('%Y%m%d_%H%M%S')
+        result_file = f"results/parameters_{timestamp}.json"
+        app.logger.info(f"Creating result file: {result_file}")
+        
+        # Initialize the parameter fuzzer
+        app.logger.info(f"ParameterFuzzer initialized with URL: {target_url}")
+        fuzzer = ParameterFuzzer(
+            target_url=target_url,
+            async_requests=10,
+            timeout=5,
+            request_delay=0.1
+        )
+        
+        # Run the fuzzing process
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            results = loop.run_until_complete(fuzzer.run())
+            loop.close()
+            
+            app.logger.info(f"Fuzzing completed with {len(results)} results")
+            
+            # Calculate statistics
+            total_params_tested = len(results) if results else 0
+            vulnerable_params = sum(1 for r in results if r.get('score', 0) > 3)
+            
+            # Process results for the parameters section format
+            app.logger.info(f"Processing {total_params_tested} results")
+            processed_results = []
+            for result in results:
+                processed_results.append({
+                    'url': result.get('url', ''),
+                    'param': result.get('param', ''),
+                    'payload': result.get('payload', ''),
+                    'category': result.get('category', ''),
+                    'status': result.get('status', 0),
+                    'score': result.get('score', 0),
+                    'evidence': result.get('evidence', []),
+                    'size': result.get('size', 0),
+                    'response_time': result.get('response_time', 0)
+                })
+                
+            # Save results to file in standard format
+            os.makedirs(os.path.dirname(result_file), exist_ok=True)
+            final_results = {
+                'meta': {
+                    'timestamp': dt.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'tool': 'Web Application Fuzzer',
+                    'target_url': target_url,
+                    'total_params_tested': total_params_tested,
+                    'vulnerable_params': vulnerable_params
+                },
+                'parameters': processed_results
+            }
+                
+            with open(result_file, 'w') as f:
+                json.dump(final_results, f, indent=4)
+                
+            app.logger.info(f"Results saved to {result_file}")
+            
+            flash(f"Parameter fuzzing completed. Tested {total_params_tested} parameters, found {vulnerable_params} potentially vulnerable parameters.", "success")
+            return redirect(url_for('results', filename=os.path.basename(result_file)))
+            
+        except Exception as e:
+            error_msg = f"Error during parameter fuzzing: {str(e)}"
+            app.logger.error(error_msg)
+            flash(error_msg, "error")
+            return redirect(url_for('parameter_fuzzing'))
+    
+    return render_template('parameter_fuzzing.html')
 
 # Routes
 @app.route('/results_list')
@@ -489,61 +777,97 @@ def results_list():
     return render_template('results_list.html', result_files=result_files)
 @app.route('/results/<filename>')
 def results(filename):
-    """Display results from a JSON file."""
+    """Display results page for a specific result file."""
     try:
         result_path = os.path.join(app.config['RESULT_FOLDER'], filename)
         with open(result_path, 'r') as f:
-            results_data = json.load(f)
-        
-        # Determine fuzzing type and get results
-        if 'api_endpoints' in filename:
-            fuzzing_type = "API Endpoint"
-            processed_results = results_data['api_endpoints']
-        elif 'directories' in filename:
-            fuzzing_type = "Directory"
-            processed_results = results_data['directories']
-        elif 'subdomains' in filename:
-            fuzzing_type = "Subdomain"
-            processed_results = results_data['subdomains']
-        elif 'virtualhosts' in filename or 'virtual_hosts' in filename:
-            fuzzing_type = "Virtual Host"
-            processed_results = results_data.get('virtual_hosts', [])
-        else:
-            fuzzing_type = "Unknown"
-            processed_results = []
+            result_data = json.load(f)
 
-        # Calculate status summary
+        target_url = result_data.get('meta', {}).get('target_url', 'Unknown')
+        
+        # Determine fuzzing type from the filename
+        fuzzing_type = 'Unknown'
+        if 'director' in filename:
+            fuzzing_type = 'Directory'
+            # Check both possible keys for directory results
+            results_list = result_data.get('directories', [])
+            if not results_list and isinstance(result_data.get('results', []), list):
+                results_list = result_data.get('results', [])
+        elif 'subdomain' in filename:
+            fuzzing_type = 'Subdomain'
+            results_list = result_data.get('subdomains', [])
+            if not results_list and isinstance(result_data.get('results', []), list):
+                results_list = result_data.get('results', [])
+        elif 'api_endpoints' in filename:
+            fuzzing_type = 'API Endpoint'
+            results_list = result_data.get('api_endpoints', [])
+            if not results_list and isinstance(result_data.get('results', []), list):
+                results_list = result_data.get('results', [])
+        elif 'parameter' in filename:
+            fuzzing_type = 'Parameter'
+            results_list = result_data.get('parameters', [])
+            if not results_list and isinstance(result_data.get('results', []), list):
+                results_list = result_data.get('results', [])
+        elif 'virtualhost' in filename:
+            fuzzing_type = 'Virtual Host'
+            results_list = result_data.get('virtualhosts', [])
+            # Check alternative keys if the expected one isn't found
+            if not results_list and isinstance(result_data.get('hosts', []), list):
+                results_list = result_data.get('hosts', [])
+            if not results_list and isinstance(result_data.get('results', []), list):
+                results_list = result_data.get('results', [])
+        else:
+            # Generic fallback - try to find results data
+            app.logger.info(f"Unknown fuzzing type for file {filename}, attempting to extract results")
+            results_list = []
+            for key in ['results', 'directories', 'subdomains', 'api_endpoints', 'parameters', 'virtualhosts', 'hosts']:
+                if isinstance(result_data.get(key, []), list):
+                    results_list = result_data.get(key, [])
+                    app.logger.info(f"Found results under key: {key}")
+                    break
+        
+        app.logger.info(f"Determined fuzzing type: {fuzzing_type}")
+        app.logger.info(f"Found {len(results_list)} processed results")
+        app.logger.info(f"Target URL: {target_url}")
+
+        # Calculate status counts
+        total_urls = len(results_list)
+        
         def get_status(result):
             """Helper to get status from either status or status_code"""
-            if isinstance(result.get('status_code'), int):
-                return result.get('status_code')
-            return result.get('status', 0)
+            if 'status' in result:
+                return result['status']
+            return result.get('status_code', 0)
             
-        status_2xx = sum(1 for r in processed_results if 200 <= get_status(r) < 300)
-        status_3xx = sum(1 for r in processed_results if 300 <= get_status(r) < 400)
-        status_4xx = sum(1 for r in processed_results if 400 <= get_status(r) < 500)
-        status_5xx = sum(1 for r in processed_results if 500 <= get_status(r) < 600)
+        status_2xx = sum(1 for r in results_list if 200 <= get_status(r) < 300)
+        status_3xx = sum(1 for r in results_list if 300 <= get_status(r) < 400)
+        status_4xx = sum(1 for r in results_list if 400 <= get_status(r) < 500)
+        status_5xx = sum(1 for r in results_list if 500 <= get_status(r) < 600)
 
-        # Get target URL from meta if available
-        target_url = results_data.get('meta', {}).get('target_url', '')
-        print(f"Processed Results: {processed_results}")
+        app.logger.info(f"Status summary: 2xx={status_2xx}, 3xx={status_3xx}, 4xx={status_4xx}, 5xx={status_5xx}")
 
         return render_template(
             'results.html',
-            target_url=target_url,
-            results=processed_results,
+            filename=filename,
             fuzzing_type=fuzzing_type,
-            total_urls=len(processed_results),
+            target_url=target_url,
+            results=results_list,
+            total_urls=total_urls,
             status_2xx=status_2xx,
             status_3xx=status_3xx,
             status_4xx=status_4xx,
             status_5xx=status_5xx,
-            filename=filename
+            additional_data=None if fuzzing_type != 'Parameter' else {
+                'vulnerable_params': sum(1 for r in results_list if r.get('score', 0) >= 3),
+                'param_categories': {
+                    category: sum(1 for r in results_list if r.get('category', 'Unknown') == category)
+                    for category in set(r.get('category', 'Unknown') for r in results_list)
+                }
+            }
         )
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        app.logger.error(f"Error loading results file {filename}: {str(e)}")
-        flash(f"Error loading results: {str(e)}", "error")
-        flash(f"Error loading results: {str(e)}", "error")
+    except Exception as e:
+        app.logger.error(f"Error displaying results: {str(e)}")
+        flash(f"Error: {str(e)}", "error")
         return redirect(url_for('results_list'))
 
 @app.route('/download_results/<filename>')
@@ -575,15 +899,26 @@ def export_csv(filename):
     # Determine the type of results based on filename
     fuzz_type = filename.split('_')[0]
     
-    # Process results based on fuzz type (directories, subdomains, api_endpoints)
+    # Process results based on fuzz type
     if fuzz_type == 'directories':
         urls = data.get('directories', [])
+        fieldnames = ['url', 'status', 'size', 'response_time', 'content_type']
     elif fuzz_type == 'subdomains':
         urls = data.get('subdomains', [])
+        fieldnames = ['url', 'status', 'size', 'response_time', 'content_type']
     elif fuzz_type == 'api_endpoints':
         urls = data.get('api_endpoints', [])
+        fieldnames = ['url', 'method', 'status', 'size', 'response_time', 'content_type', 'auth_required']
+    elif fuzz_type == 'parameters':
+        # For parameter fuzzing, check both formats
+        if 'parameters' in data:
+            urls = data.get('parameters', [])
+        else:
+            urls = data.get('results', [])
+        fieldnames = ['url', 'param', 'payload', 'category', 'status', 'score', 'evidence', 'size', 'response_time']
     else:
         urls = []
+        fieldnames = ['url', 'status', 'size', 'response_time', 'content_type']
     
     # Create processed results list with uniform structure
     processed_results = []
@@ -603,19 +938,16 @@ def export_csv(filename):
     
     # Create CSV data
     csv_data = StringIO()
-    fieldnames = ['url', 'status', 'size', 'response_time', 'content_type']
-    
     writer = csv.DictWriter(csv_data, fieldnames=fieldnames)
     writer.writeheader()
     
     for result in processed_results:
-        row = {
-            'url': result.get('url', ''),
-            'status': result.get('status', 'N/A'),
-            'size': result.get('size', 'N/A'),
-            'response_time': result.get('response_time', 'N/A'),
-            'content_type': result.get('content_type', 'N/A')
-        }
+        row = {}
+        for field in fieldnames:
+            if field == 'evidence' and isinstance(result.get(field), list):
+                row[field] = ', '.join(result.get(field, []))
+            else:
+                row[field] = result.get(field, 'N/A')
         writer.writerow(row)
     
     # Create response with CSV data
@@ -755,10 +1087,98 @@ async def update_all_urls(filename):
     
     # Redirect to the results page
     return redirect(url_for('results', filename=filename))
-# Routes
-# These routes are already defined above
 
+# New settings routes
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    """Settings page for application configuration."""
+    global app_config
+    
+    if request.method == 'POST':
+        try:
+            # Extract form data
+            new_config = {
+                "target_url": request.form.get('target_url', ''),
+                "target_domain": request.form.get('target_domain', ''),
+                "directories": {
+                    "enabled": request.form.get('directories_enabled') == 'on',
+                    "wordlist": app_config['directories'].get('wordlist', 'wordlists/directory_wordlist.txt')
+                },
+                "subdomains": {
+                    "enabled": request.form.get('subdomains_enabled') == 'on',
+                    "wordlist": app_config['subdomains'].get('wordlist', 'wordlists/subdomain_wordlist.txt')
+                },
+                "api_endpoints": {
+                    "enabled": request.form.get('api_endpoints_enabled') == 'on',
+                    "wordlist": app_config['api_endpoints'].get('wordlist', 'wordlists/api_endpoints.txt')
+                },
+                "parameter_fuzzing": {
+                    "enabled": request.form.get('parameter_fuzzing_enabled') == 'on',
+                    "wordlist": app_config['parameter_fuzzing'].get('wordlist', 'wordlists/parameter_wordlist.txt')
+                },
+                "request_options": {
+                    "method": request.form.get('request_method', 'GET'),
+                    "timeout": int(request.form.get('timeout', 10)),
+                    "retries": int(request.form.get('retries', 3))
+                },
+                "rate_limiting": {
+                    "enabled": request.form.get('rate_limiting_enabled') == 'on',
+                    "requests_per_second": int(request.form.get('requests_per_second', 5))
+                },
+                "logging": {
+                    "enabled": request.form.get('logging_enabled') == 'on',
+                    "log_file": request.form.get('log_file', 'fuzzer_log.log')
+                }
+            }
+            
+            # Save the configuration
+            if save_config(new_config):
+                app_config = new_config  # Update the in-memory config
+                flash("Settings saved successfully", "success")
+            else:
+                flash("Error saving settings", "error")
+                
+        except Exception as e:
+            app.logger.error(f"Error processing settings form: {str(e)}")
+            flash(f"Error processing settings: {str(e)}", "error")
+        
+        return redirect(url_for('settings'))
+    
+    # GET request - show the settings page
+    return render_template('settings.html', config=app_config)
+
+@app.route('/reset_settings')
+def reset_settings():
+    """Reset settings to defaults."""
+    global app_config
+    
+    try:
+        # Copy default config to current config
+        if os.path.exists(app.config['DEFAULT_CONFIG_FILE']):
+            shutil.copy(app.config['DEFAULT_CONFIG_FILE'], app.config['CONFIG_FILE'])
+            app_config = load_config()  # Reload the config
+            flash("Settings have been reset to defaults", "success")
+        else:
+            flash("Default configuration file not found", "error")
+    except Exception as e:
+        app.logger.error(f"Error resetting settings: {str(e)}")
+        flash(f"Error resetting settings: {str(e)}", "error")
+    
+    return redirect(url_for('settings'))
+
+# New endpoint to check fuzzing progress
+@app.route('/fuzzing_progress/<task_id>')
+def fuzzing_progress(task_id):
+    global fuzzing_tasks
+    if task_id in fuzzing_tasks:
+        return jsonify(fuzzing_tasks[task_id].to_dict())
+    else:
+        return jsonify({"error": "Task not found"}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    print("Directory fuzzing enabled!") if app_config['directories']['enabled'] else None
+    print("SubDomain fuzzing enabled!") if app_config['subdomains']['enabled'] else None
+    print("API Endpoints fuzzing enabled!") if app_config['api_endpoints']['enabled'] else None
+    print("Parameter Fuzzing enabled!") if app_config.get('parameter_fuzzing', {}).get('enabled', False) else None
+    app.run(host='0.0.0.0', debug=True)
 

@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  web-fuzzer:
+    build: .
+    container_name: web-fuzzer
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./results:/app/results
+      - ./wordlists:/app/wordlists
+      - ./uploads:/app/uploads
+      - ./config:/app/config
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      # Add your Cohere API key here if you want to use AI-generated wordlists
+      # - COHERE_API_KEY=your_api_key_here
+    restart: unless-stopped 

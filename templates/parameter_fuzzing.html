@@ -1,0 +1,57 @@
+{% extends "base_new.html" %}
+
+{% block title %}Parameter Fuzzing{% endblock %}
+
+{% block page_title %}Parameter Fuzzing{% endblock %}
+{% block page_subtitle %}Test parameters for vulnerabilities on target URLs{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="target_url" class="form-label">Target URL</label>
+        <input type="text" class="form-control" id="target_url" name="target_url" required
+               placeholder="https://example.com/page?param=value">
+        <div class="form-text">Enter a URL containing parameters to test, including query parameters or fragment-based parameters (e.g., #?param=value)</div>
+    </div>
+
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="verify_ssl" name="verify_ssl">
+        <label class="form-check-label" for="verify_ssl">Verify SSL certificates</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Start Fuzzing</button>
+</form>
+
+<div class="info-section" style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+    <h3>About Parameter Fuzzing</h3>
+    <p>Parameter fuzzing tests web application parameters for security vulnerabilities by sending various payloads and analyzing the responses.</p>
+    
+    <h4>Features</h4>
+    <ul>
+        <li>Tests for SQL injection, XSS, path traversal, command injection, and more</li>
+        <li>Handles both regular URLs and single page applications with fragment-based parameters</li>
+        <li>Tests against 30+ different payload types for comprehensive security testing</li>
+        <li>Analyzes responses for signs of vulnerabilities like error messages and reflections</li>
+    </ul>
+    
+    <h4>Usage Examples</h4>
+    <div style="background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 10px 0;">
+        <div style="font-weight: 600;">Traditional Query Parameters:</div>
+        <div style="color: #2e7d32; font-family: monospace; margin-top: 5px;">https://example.com/search?q=test&page=1</div>
+    </div>
+    
+    <div style="background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 10px 0;">
+        <div style="font-weight: 600;">Single Page App (SPA) Fragment Parameters:</div>
+        <div style="color: #2e7d32; font-family: monospace; margin-top: 5px;">https://example.com/#/dashboard?user=admin&view=summary</div>
+    </div>
+    
+    <div style="background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 10px 0;">
+        <div style="font-weight: 600;">OWASP Juice Shop Example:</div>
+        <div style="color: #2e7d32; font-family: monospace; margin-top: 5px;">https://demo.owasp-juice.shop/#/search?q=apple</div>
+    </div>
+    
+    <div class="alert alert-info" style="margin-top: 20px; background-color: #e3f2fd; color: #0c5460; border-color: #bee5eb; border-radius: 6px; padding: 15px;">
+        <strong>Tip:</strong> If no parameters are found in your URL, the tool will automatically test with common parameter names like 'id', 'page', 'search', etc.
+    </div>
+</div>
+{% endblock %} 

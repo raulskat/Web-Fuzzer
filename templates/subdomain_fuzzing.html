@@ -1,99 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Fuzzer - Subdomain Fuzzing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Web Fuzzer</h1>
-            <h2>Subdomain Fuzzing</h2>
-            <nav>
-                <ul>
-                    <li><a href="{{ url_for('index') }}">Home</a></li>
-                    <li><a href="{{ url_for('directory_fuzzing') }}">Directory Fuzzing</a></li>
-                    <li><a href="{{ url_for('subdomain_fuzzing') }}" class="active">Subdomain Fuzzing</a></li>
-                    <li><a href="{{ url_for('api_endpoints_fuzzing') }}">API Endpoints</a></li>
-                    <li><a href="{{ url_for('results_list') }}">Results</a></li>
-                </ul>
-            </nav>
-        </header>
+{% extends "base_new.html" %}
 
-        <main>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+{% block title %}Subdomain Fuzzing{% endblock %}
 
-            <div class="card">
-                <div class="card-header">
-                    <h3>Subdomain Fuzzing</h3>
-                </div>
-                <div class="card-body">
-                    <form action="{{ url_for('subdomain_fuzzing') }}" method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="target_domain">Target Domain (e.g., example.com):</label>
-                            <input type="text" id="target_domain" name="target_domain" class="form-control" placeholder="example.com" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <div class="form-check mb-3">
-                                <input type="checkbox" id="use_wordlist" name="use_wordlist" class="form-check-input">
-                                <label for="use_wordlist" class="form-check-label">Use custom wordlist</label>
-                            </div>
-                            
-                            <div id="wordlist-section" style="display: none;">
-                                <label for="wordlist_file">Upload Wordlist File:</label>
-                                <input type="file" id="wordlist_file" name="wordlist_file" class="form-control" accept=".txt">
-                                <small class="form-text text-muted">Upload a text file with one subdomain per line.</small>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="protocol">Protocol:</label>
-                            <select id="protocol" name="protocol" class="form-control">
-                                <option value="https">HTTPS</option>
-                                <option value="http">HTTP</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="threads">Number of Threads:</label>
-                            <input type="number" id="threads" name="threads" class="form-control" value="10" min="1" max="50">
-                            <small class="form-text text-muted">Higher values may cause faster results but might overload the target server.</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="timeout">Request Timeout (seconds):</label>
-                            <input type="number" id="timeout" name="timeout" class="form-control" value="5" min="1" max="30">
-                        </div>
-                        
-                        <div class="form-check">
-                            <input type="checkbox" id="dns_resolution" name="dns_resolution" class="form-check-input" checked>
-                            <label for="dns_resolution" class="form-check-label">Verify subdomains with DNS resolution</label>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Start Fuzzing</button>
-                            <button type="reset" class="btn btn-secondary">Reset</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </main>
+{% block page_title %}Subdomain Fuzzing{% endblock %}
+{% block page_subtitle %}Enumerate subdomains of a target domain{% endblock %}
 
-        <footer>
-            <p>&copy; 2025 Web Application Fuzzer</p>
-        </footer>
+{% block content %}
+<form method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="target_domain" class="form-label">Target Domain</label>
+        <input type="text" class="form-control" id="target_domain" name="target_domain" required
+               placeholder="example.com">
+        <div class="form-text">Enter a domain name to scan for subdomains (e.g., example.com).</div>
     </div>
-    
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="use_wordlist" name="use_wordlist">
+        <label class="form-check-label" for="use_wordlist">Use custom wordlist</label>
+    </div>
+
+    <div class="form-group">
+        <label for="wordlist_file" class="form-label">Custom Wordlist File</label>
+        <input type="file" class="form-control" id="wordlist_file" name="wordlist_file">
+        <div class="form-text">Upload a text file with one subdomain prefix per line.</div>
+    </div>
+
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="verify_ssl" name="verify_ssl">
+        <label class="form-check-label" for="verify_ssl">Verify SSL certificates</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Start Fuzzing</button>
+</form>
+{% endblock %}
 

@@ -1,0 +1,237 @@
+{% extends "base_new.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block page_title %}Application Settings{% endblock %}
+{% block page_subtitle %}Configure Web Fuzzer parameters and defaults{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .settings-container {
+        margin-bottom: 30px;
+    }
+    
+    .settings-section {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+    
+    .settings-header {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+    }
+    
+    .settings-header i {
+        font-size: 1.2rem;
+        margin-right: 10px;
+        color: #555;
+    }
+    
+    .settings-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .settings-body {
+        padding: 20px;
+    }
+    
+    .settings-row {
+        margin-bottom: 15px;
+    }
+    
+    .settings-footer {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #eee;
+        text-align: right;
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .checkbox-wrapper .form-check-input {
+        margin-right: 10px;
+    }
+    
+    .secondary-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .settings-footer .btn {
+        margin-left: 10px;
+    }
+    
+    .rate-slider {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .rate-value {
+        font-weight: 600;
+        color: #0066cc;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('settings') }}">
+    <div class="settings-container">
+        <!-- General Settings -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <i class="fa fa-globe"></i>
+                <h3>General Settings</h3>
+            </div>
+            <div class="settings-body">
+                <div class="settings-row">
+                    <label for="target_url" class="form-label">Default Target URL</label>
+                    <input type="text" class="form-control" id="target_url" name="target_url" value="{{ config.target_url }}">
+                    <div class="secondary-text">Default URL used for directory and API fuzzing</div>
+                </div>
+                
+                <div class="settings-row">
+                    <label for="target_domain" class="form-label">Default Target Domain</label>
+                    <input type="text" class="form-control" id="target_domain" name="target_domain" value="{{ config.target_domain }}">
+                    <div class="secondary-text">Default domain used for subdomain fuzzing</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Module Settings -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <i class="fa fa-toggle-on"></i>
+                <h3>Module Settings</h3>
+            </div>
+            <div class="settings-body">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="form-check-input" id="directories_enabled" name="directories_enabled" {% if config.directories.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="directories_enabled">Directory Fuzzing</label>
+                </div>
+                
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="form-check-input" id="subdomains_enabled" name="subdomains_enabled" {% if config.subdomains.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="subdomains_enabled">Subdomain Fuzzing</label>
+                </div>
+                
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="form-check-input" id="api_endpoints_enabled" name="api_endpoints_enabled" {% if config.api_endpoints.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="api_endpoints_enabled">API Endpoints Fuzzing</label>
+                </div>
+                
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="form-check-input" id="parameter_fuzzing_enabled" name="parameter_fuzzing_enabled" {% if config.parameter_fuzzing.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="parameter_fuzzing_enabled">Parameter Fuzzing</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Request Settings -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <i class="fa fa-exchange-alt"></i>
+                <h3>Request Settings</h3>
+            </div>
+            <div class="settings-body">
+                <div class="settings-row">
+                    <label for="request_method" class="form-label">Default HTTP Method</label>
+                    <select class="form-control" id="request_method" name="request_method">
+                        <option value="GET" {% if config.request_options.method == 'GET' %}selected{% endif %}>GET</option>
+                        <option value="POST" {% if config.request_options.method == 'POST' %}selected{% endif %}>POST</option>
+                        <option value="HEAD" {% if config.request_options.method == 'HEAD' %}selected{% endif %}>HEAD</option>
+                    </select>
+                </div>
+                
+                <div class="settings-row">
+                    <label for="timeout" class="form-label">Request Timeout (seconds)</label>
+                    <input type="number" class="form-control" id="timeout" name="timeout" min="1" max="60" value="{{ config.request_options.timeout }}">
+                </div>
+                
+                <div class="settings-row">
+                    <label for="retries" class="form-label">Max Retries</label>
+                    <input type="number" class="form-control" id="retries" name="retries" min="0" max="10" value="{{ config.request_options.retries }}">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rate Limiting -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <i class="fa fa-tachometer-alt"></i>
+                <h3>Rate Limiting</h3>
+            </div>
+            <div class="settings-body">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="form-check-input" id="rate_limiting_enabled" name="rate_limiting_enabled" {% if config.rate_limiting.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="rate_limiting_enabled">Enable Rate Limiting</label>
+                </div>
+                
+                <div class="settings-row">
+                    <label for="requests_per_second" class="form-label">Requests Per Second: <span class="rate-value" id="rate-display">{{ config.rate_limiting.requests_per_second }}</span></label>
+                    <input type="range" class="rate-slider" id="requests_per_second" name="requests_per_second" min="1" max="50" value="{{ config.rate_limiting.requests_per_second }}">
+                    <div class="secondary-text">Higher values may trigger rate limiting or detection</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logging -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <i class="fa fa-file-alt"></i>
+                <h3>Logging</h3>
+            </div>
+            <div class="settings-body">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="form-check-input" id="logging_enabled" name="logging_enabled" {% if config.logging.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="logging_enabled">Enable Logging</label>
+                </div>
+                
+                <div class="settings-row">
+                    <label for="log_file" class="form-label">Log File Path</label>
+                    <input type="text" class="form-control" id="log_file" name="log_file" value="{{ config.logging.log_file }}">
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-footer">
+            <button type="button" class="btn btn-secondary" id="reset-defaults">Reset to Defaults</button>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Update the displayed rate limit value when slider changes
+    document.getElementById('requests_per_second').addEventListener('input', function() {
+        document.getElementById('rate-display').textContent = this.value;
+    });
+    
+    // Reset to defaults button
+    document.getElementById('reset-defaults').addEventListener('click', function() {
+        if (confirm('Are you sure you want to reset all settings to default values?')) {
+            window.location.href = "{{ url_for('reset_settings') }}";
+        }
+    });
+</script>
+{% endblock %} 

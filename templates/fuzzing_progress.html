@@ -1,0 +1,175 @@
+{% extends "base_new.html" %}
+
+{% block title %}{{ task_type|capitalize }} Fuzzing Progress{% endblock %}
+
+{% block page_title %}{{ task_type|capitalize }} Fuzzing Progress{% endblock %}
+{% block page_subtitle %}Target: {{ target }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .progress-container {
+        margin: 30px 0;
+    }
+    
+    .progress {
+        height: 25px;
+        border-radius: 5px;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .progress-bar {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        background-color: #007bff;
+        transition: width .6s ease;
+    }
+    
+    .status-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .status-info h3 {
+        margin-top: 0;
+        color: #343a40;
+    }
+    
+    .status-info p {
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+    
+    .status-info .label {
+        font-weight: 600;
+        margin-right: 8px;
+        color: #495057;
+    }
+    
+    .elapsed-time {
+        font-family: monospace;
+        font-size: 18px;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .btn-view-results {
+        margin-top: 20px;
+        display: none;
+    }
+    
+    #error-message {
+        margin-top: 20px;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="status-info">
+    <h3>Status: <span id="status-text">Initializing...</span></h3>
+    <p><span class="label">Task:</span> {{ task_type|capitalize }} Fuzzing</p>
+    <p><span class="label">Target:</span> {{ target }}</p>
+    <p><span class="label">Time elapsed:</span> <span class="elapsed-time" id="elapsed-time">00:00:00</span></p>
+</div>
+
+<div class="progress-container">
+    <div class="progress">
+        <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
+    <p id="progress-text" class="text-center mt-2">Initializing fuzzing process...</p>
+</div>
+
+<div id="error-message" class="alert alert-danger">
+    <h4><i class="fa fa-exclamation-triangle"></i> Error</h4>
+    <p id="error-text"></p>
+</div>
+
+<div class="text-center">
+    <a href="{{ url_for('results', filename=result_filename) }}" id="view-results-btn" class="btn btn-primary btn-lg btn-view-results">
+        <i class="fa fa-table"></i> View Results
+    </a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const taskId = "{{ task_id }}";
+        const resultUrl = "{{ url_for('results', filename=result_filename) }}";
+        let pollInterval;
+        let startTime = Date.now();
+        
+        function formatElapsedTime(milliseconds) {
+            const seconds = Math.floor(milliseconds / 1000);
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        
+        function updateElapsedTime() {
+            const elapsed = Date.now() - startTime;
+            document.getElementById('elapsed-time').textContent = formatElapsedTime(elapsed);
+        }
+        
+        function updateProgressBar(progress) {
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${progress}%`;
+            progressBar.setAttribute('aria-valuenow', progress);
+        }
+        
+        function checkProgress() {
+            fetch(`/fuzzing_progress/${taskId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch progress');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Update progress
+                    updateProgressBar(data.progress);
+                    document.getElementById('progress-text').textContent = data.message;
+                    document.getElementById('status-text').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                    
+                    // If completed, show the results button
+                    if (data.status === 'completed') {
+                        document.getElementById('view-results-btn').style.display = 'inline-block';
+                        clearInterval(pollInterval);
+                        
+                        // Automatically redirect after 3 seconds
+                        setTimeout(() => {
+                            window.location.href = resultUrl;
+                        }, 3000);
+                    }
+                    
+                    // If error, show error message
+                    if (data.status === 'error') {
+                        document.getElementById('error-message').style.display = 'block';
+                        document.getElementById('error-text').textContent = data.message;
+                        clearInterval(pollInterval);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking progress:', error);
+                });
+        }
+        
+        // Update elapsed time every second
+        setInterval(updateElapsedTime, 1000);
+        
+        // Poll for progress every 2 seconds
+        pollInterval = setInterval(checkProgress, 2000);
+        
+        // Initial check
+        checkProgress();
+    });
+</script>
+{% endblock %} 

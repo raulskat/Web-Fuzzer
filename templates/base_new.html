@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Fuzzer - {% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=999">
+    {% block additional_css %}{% endblock %}
+    <style>
+        /* Global */
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1a1a1a;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            color: white;
+        }
+
+        /* Main content */
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Form styling */
+        .form-container {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+            outline: none;
+        }
+
+        .form-text {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-check-input {
+            margin-right: 0.5rem;
+        }
+
+        /* Button styles */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0052a3;
+            transform: translateY(-1px);
+        }
+
+        /* Navbar links */
+        .navbar-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .navbar-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .navbar-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #fff;
+            transition: width 0.25s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .navbar-link:hover {
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .navbar-link:hover:after,
+        .navbar-link.active:after {
+            width: 100%;
+        }
+
+        .navbar-link.active {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Alert styling */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 6px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Section header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-top: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            margin-bottom: 0.8rem;
+            color: #1a1a1a;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .section-header .lead {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 400;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .navbar-content {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .navbar-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .section-header h2 {
+                font-size: 2rem;
+            }
+            
+            .section-header .lead {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin: 1rem;
+            }
+            
+            .form-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-link {
+                font-size: 0.85rem;
+                padding: 0.3rem 0;
+            }
+            
+            .navbar-links {
+                gap: 0.8rem;
+            }
+            
+            .section-header h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <h1>Web Fuzzer</h1>
+            <div class="navbar-links">
+                <a href="{{ url_for('index') }}" class="navbar-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                <a href="{{ url_for('directory_fuzzing') }}" class="navbar-link {% if request.endpoint == 'directory_fuzzing' %}active{% endif %}">Directory Fuzzing</a>
+                <a href="{{ url_for('subdomain_fuzzing') }}" class="navbar-link {% if request.endpoint == 'subdomain_fuzzing' %}active{% endif %}">Subdomain Fuzzing</a>
+                <a href="{{ url_for('api_endpoints_fuzzing') }}" class="navbar-link {% if request.endpoint == 'api_endpoints_fuzzing' %}active{% endif %}">API Fuzzing</a>
+                <a href="{{ url_for('virtualhost_fuzzing') }}" class="navbar-link {% if request.endpoint == 'virtualhost_fuzzing' %}active{% endif %}">Virtual Host Fuzzing</a>
+                <a href="{{ url_for('parameter_fuzzing') }}" class="navbar-link {% if request.endpoint == 'parameter_fuzzing' %}active{% endif %}">Parameter Fuzzing</a>
+                <a href="{{ url_for('results_list') }}" class="navbar-link {% if request.endpoint == 'results_list' %}active{% endif %}">View Results</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="section-header">
+            <h2>{% block page_title %}Web Fuzzing Tool{% endblock %}</h2>
+            <p class="lead">{% block page_subtitle %}Advanced tools for web application security testing{% endblock %}</p>
+        </div>
+
+        <div class="form-container">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,98 @@
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local development
+.env
+.env.local
+.env.*.local
+
+# Docker
+.docker
+docker-compose*.yml
+
+# Local data
+results/*
+uploads/*
+logs/
+*.log
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Test files
+tests/
+test_*
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+.env
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Data directories (these will be mounted as volumes)
+results/
+uploads/
+
+# Logs
+*.log
+
+# Certificate files
+*.pem
+*.cert
+*.key
+
+# Other
+README-DOCKER.md
+.DS_Store 
