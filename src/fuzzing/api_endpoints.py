@@ -87,7 +87,7 @@ class ApiFuzzer:
             self.current_progress = 0
             
             if self.progress_callback:
-                self.progress_callback(0, self.total_endpoints, f"Preparing to test {self.total_endpoints} endpoint/method combinations")
+                self.progress_callback(5, self.total_endpoints, f"Preparing to test {self.total_endpoints} endpoint/method combinations")
 
             # Function to update progress after each endpoint is processed
             def update_progress():
@@ -95,7 +95,7 @@ class ApiFuzzer:
                 if self.progress_callback:
                     progress_percentage = int((self.current_progress / self.total_endpoints) * 100)
                     self.progress_callback(
-                        self.current_progress,
+                        progress_percentage,
                         self.total_endpoints,
                         f"Testing endpoints: {self.current_progress}/{self.total_endpoints} complete ({progress_percentage}%)"
                     )
@@ -105,7 +105,11 @@ class ApiFuzzer:
 
                 # Submit tasks for each endpoint and HTTP method combination
                 for endpoint in endpoints:
-                    url = f"{self.base_url}{endpoint}"
+                    # Normalize both base URL and endpoint
+                    base = self.base_url.rstrip('/')
+                    path = endpoint.lstrip('/')
+                    url = f"{base}/{path}"
+                    
                     for method in self.methods:
                         future = executor.submit(self.test_endpoint, url, method)
                         future_to_endpoint[future] = (url, method)
@@ -130,7 +134,7 @@ class ApiFuzzer:
             if self.progress_callback:
                 valid_count = sum(1 for r in results if r[2] == "valid" if len(r) > 2)
                 self.progress_callback(
-                    self.total_endpoints, 
+                    100,  # Send 100% instead of raw count
                     self.total_endpoints, 
                     f"Fuzzing completed. Found {valid_count} accessible endpoints."
                 )

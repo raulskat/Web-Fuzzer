@@ -272,28 +272,28 @@ class AsyncRequestHandler:
             "response_time": 0
         }
 
-    # Keep the session-based method for other uses
     async def send_request_with_session(self, session, url, method="GET", headers=None):
         """
-        Send a request using an existing session.
-        This is the original method signature that was in request_handler_async.py
+        Send a request to the specified URL using an existing session.
+        This is more efficient for multiple requests.
         """
         attempts = 0
-        headers = headers or {}
-
+        headers = headers or self.default_headers
+        
         while attempts < self.max_retries:
             try:
                 start_time = time.time()
-                async with session.request(method, url, headers=headers, timeout=self.timeout, ssl=self.ssl_verify) as response:
-                    response_time = time.time() - start_time
+                
+                async with session.request(method, url, headers=headers, timeout=self.timeout) as response:
                     content = await response.read()
-
+                    response_time = time.time() - start_time
                     content_length = len(content)
+                    
                     try:
                         content_str = content.decode('utf-8')
                     except UnicodeDecodeError:
                         content_str = f"[Binary content of {content_length} bytes]"
-
+                    
                     return {
                         "url": url,
                         "status": response.status,

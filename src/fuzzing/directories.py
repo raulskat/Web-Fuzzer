@@ -362,9 +362,9 @@ class DirectoryFuzzer:
                 # Calculate percentage: 10% for preparation + 90% for actual fuzzing
                 percentage = 10 + int((self.current_progress / self.total_paths) * 90)
                 self.progress_callback(
-                    self.current_progress, 
+                    percentage,  # Send percentage instead of raw count
                     self.total_paths,
-                    f"Testing paths: {self.current_progress}/{self.total_paths} complete"
+                    f"Testing paths: {self.current_progress}/{self.total_paths} complete ({percentage}%)"
                 )
         
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
@@ -406,7 +406,7 @@ class DirectoryFuzzer:
         
         # Update progress to 100%
         if self.progress_callback:
-            self.progress_callback(self.total_paths, self.total_paths, f"Fuzzing completed. Found {status_counts['2xx'] + status_counts['3xx']} accessible paths.")
+            self.progress_callback(100, self.total_paths, f"Fuzzing completed. Found {status_counts['2xx'] + status_counts['3xx']} accessible paths.")
         
         # Add metadata to the report
         metadata = {

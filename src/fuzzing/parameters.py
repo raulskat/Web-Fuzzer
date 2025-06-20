@@ -35,6 +35,9 @@ class ParameterFuzzer:
         self.custom_payloads_file = payloads_file
         self.request_handler = AsyncRequestHandler(ssl_verify=verify_ssl, timeout=timeout)
         self.semaphore = asyncio.Semaphore(async_requests)
+        self.progress_callback = None
+        self.total_tests = 0
+        self.completed_tests = 0
         
         print(f"Starting parameter fuzzing for: {target_url}")
 
@@ -247,12 +250,32 @@ class ParameterFuzzer:
             "size": len(response.get("content", ""))
         })
 
+    def set_progress_callback(self, callback):
+        """Set a callback function to report progress during fuzzing.
+        The callback should accept three parameters:
+        - completed: number or percentage of parameters processed
+        - total: total number of parameters to process
+        - message: current status message
+        """
+        self.progress_callback = callback
+
     async def fuzz_param(self, url_info):
         """Test a single parameter with a specific payload"""
         url, param, payload, category = url_info
         async with self.semaphore:
             response = await self.request_handler.send_request(url)
             await self.analyze_response(response, param, payload, category)
+            
+            # Update progress
+            self.completed_tests += 1
+            if self.progress_callback:
+                progress_percentage = int((self.completed_tests / self.total_tests) * 100)
+                self.progress_callback(
+                    progress_percentage,
+                    self.total_tests,
+                    f"Testing parameters: {self.completed_tests}/{self.total_tests} complete ({progress_percentage}%)"
+                )
+                
             await asyncio.sleep(self.request_delay)
 
     async def run(self):
@@ -265,6 +288,12 @@ class ParameterFuzzer:
             
         # Generate URLs for fuzzing
         urls_to_test = self.generate_urls(self.payloads)
+        self.total_tests = len(urls_to_test)
+        self.completed_tests = 0
+        
+        # Report initial progress
+        if self.progress_callback:
+            self.progress_callback(0, self.total_tests, f"Starting parameter fuzzing with {self.total_tests} tests on {self.target_url}")
         
         print(f"Running {len(urls_to_test)} parameter tests...")
 
@@ -291,6 +320,15 @@ class ParameterFuzzer:
         
         processing_time = time.time() - start_time
         print(f"Completed parameter fuzzing with {len(self.results)} results")
+        
+        # Report completion
+        if self.progress_callback:
+            vulnerable_count = sum(1 for r in self.results if r.get('score', 0) > 3)
+            self.progress_callback(
+                100,
+                self.total_tests,
+                f"Parameter fuzzing completed. Found {vulnerable_count} potentially vulnerable parameters."
+            )
             
         return self.results
 

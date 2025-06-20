@@ -1,19 +1,35 @@
-version: '3'
+version: '3.8'
 
 services:
   web-fuzzer:
     build: .
-    container_name: web-fuzzer
+    image: web-fuzzer:latest
     ports:
       - "5000:5000"
-    volumes:
-      - ./results:/app/results
-      - ./wordlists:/app/wordlists
-      - ./uploads:/app/uploads
-      - ./config:/app/config
     environment:
       - FLASK_ENV=production
-      - PYTHONUNBUFFERED=1
-      # Add your Cohere API key here if you want to use AI-generated wordlists
-      # - COHERE_API_KEY=your_api_key_here
-    restart: unless-stopped 
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=0
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-default-secret-key}  # Override this in production
+      - COHERE_API_KEY=${COHERE_API_KEY}
+    volumes:
+      - ./wordlists:/app/wordlists
+      - ./results:/app/results
+      - ./uploads:/app/uploads
+      - ./config:/app/config
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M

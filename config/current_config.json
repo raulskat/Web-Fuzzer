@@ -19,12 +19,12 @@
     },
     "request_options": {
         "method": "GET",
-        "timeout": 10,
+        "timeout": 5,
         "retries": 3
     },
     "rate_limiting": {
         "enabled": true,
-        "requests_per_second": 5
+        "requests_per_second": 15
     },
     "logging": {
         "enabled": true,

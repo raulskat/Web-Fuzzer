@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory, make_response, jsonify
 from werkzeug.utils import secure_filename
 from urllib.parse import urlparse
@@ -14,18 +14,50 @@ import asyncio
 import aiohttp
 import shutil
 import uuid
+import secrets
+import logging
+from logging.handlers import RotatingFileHandler
 from src.fuzzing.directories import DirectoryFuzzer
 from src.fuzzing.subdomains import SubdomainFuzzer
 from src.fuzzing.api_endpoints import ApiFuzzer
 from src.utils.request_handler import RequestHandler
 from src.fuzzing.parameters import ParameterFuzzer
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+)
+
+# Create the Flask application
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['RESULT_FOLDER'] = 'results'
-app.config['CONFIG_FILE'] = 'config/current_config.json'
-app.config['DEFAULT_CONFIG_FILE'] = 'config/default_config.json'
-app.secret_key = 'your-secret-key'  # Change this in production
+
+# Production configurations
+app.config.update(
+    SECRET_KEY=os.environ.get('FLASK_SECRET_KEY') or secrets.token_hex(32),
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=60),
+    UPLOAD_FOLDER='uploads',
+    RESULT_FOLDER='results',
+    CONFIG_FILE='config/current_config.json',
+    DEFAULT_CONFIG_FILE='config/default_config.json',
+    MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 16MB max file size
+)
+
+# Configure logging to file
+if not app.debug:
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    file_handler = RotatingFileHandler('logs/web_fuzzer.log', maxBytes=10240, backupCount=10)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+    ))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    app.logger.setLevel(logging.INFO)
+    app.logger.info('Web Fuzzer startup')
 
 # Global variable to track fuzzing progress
 fuzzing_tasks = {}
@@ -443,7 +475,10 @@ def api_endpoints_fuzzing():
                 
                 # Set the progress callback
                 fuzzer.set_progress_callback(lambda completed, total, message: 
-                    progress.update(completed, message))
+                    progress.update(
+                        int((completed / 100) * progress.total) if completed <= 100 else completed, 
+                        message
+                    ))
                 
                 # Run the fuzzing
                 fuzzing_results = fuzzer.fuzz_api_endpoints()
@@ -684,6 +719,13 @@ def parameter_fuzzing():
         result_file = f"results/parameters_{timestamp}.json"
         app.logger.info(f"Creating result file: {result_file}")
         
+        # Generate a unique task ID for progress tracking
+        task_id = str(uuid.uuid4())
+        
+        # Create and store progress tracker
+        progress = FuzzingProgress(task_id, "parameter", total=100)  # We'll update the total later
+        fuzzing_tasks[task_id] = progress
+        
         # Initialize the parameter fuzzer
         app.logger.info(f"ParameterFuzzer initialized with URL: {target_url}")
         fuzzer = ParameterFuzzer(
@@ -693,61 +735,80 @@ def parameter_fuzzing():
             request_delay=0.1
         )
         
-        # Run the fuzzing process
-        try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            results = loop.run_until_complete(fuzzer.run())
-            loop.close()
-            
-            app.logger.info(f"Fuzzing completed with {len(results)} results")
-            
-            # Calculate statistics
-            total_params_tested = len(results) if results else 0
-            vulnerable_params = sum(1 for r in results if r.get('score', 0) > 3)
-            
-            # Process results for the parameters section format
-            app.logger.info(f"Processing {total_params_tested} results")
-            processed_results = []
-            for result in results:
-                processed_results.append({
-                    'url': result.get('url', ''),
-                    'param': result.get('param', ''),
-                    'payload': result.get('payload', ''),
-                    'category': result.get('category', ''),
-                    'status': result.get('status', 0),
-                    'score': result.get('score', 0),
-                    'evidence': result.get('evidence', []),
-                    'size': result.get('size', 0),
-                    'response_time': result.get('response_time', 0)
-                })
+        # Set the progress callback
+        fuzzer.set_progress_callback(lambda completed, total, message: 
+            progress.update(
+                int((completed / 100) * progress.total) if completed <= 100 else completed, 
+                message
+            ))
+        
+        # Start fuzzing in a background thread
+        import threading
+        def run_fuzzing():
+            try:
+                # Run the fuzzing process
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                results = loop.run_until_complete(fuzzer.run())
+                loop.close()
                 
-            # Save results to file in standard format
-            os.makedirs(os.path.dirname(result_file), exist_ok=True)
-            final_results = {
-                'meta': {
-                    'timestamp': dt.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'tool': 'Web Application Fuzzer',
-                    'target_url': target_url,
-                    'total_params_tested': total_params_tested,
-                    'vulnerable_params': vulnerable_params
-                },
-                'parameters': processed_results
-            }
+                app.logger.info(f"Fuzzing completed with {len(results)} results")
                 
-            with open(result_file, 'w') as f:
-                json.dump(final_results, f, indent=4)
+                # Calculate statistics
+                total_params_tested = len(results) if results else 0
+                vulnerable_params = sum(1 for r in results if r.get('score', 0) > 3)
                 
-            app.logger.info(f"Results saved to {result_file}")
-            
-            flash(f"Parameter fuzzing completed. Tested {total_params_tested} parameters, found {vulnerable_params} potentially vulnerable parameters.", "success")
-            return redirect(url_for('results', filename=os.path.basename(result_file)))
-            
-        except Exception as e:
-            error_msg = f"Error during parameter fuzzing: {str(e)}"
-            app.logger.error(error_msg)
-            flash(error_msg, "error")
-            return redirect(url_for('parameter_fuzzing'))
+                # Process results for the parameters section format
+                app.logger.info(f"Processing {total_params_tested} results")
+                processed_results = []
+                for result in results:
+                    processed_results.append({
+                        'url': result.get('url', ''),
+                        'param': result.get('param', ''),
+                        'payload': result.get('payload', ''),
+                        'category': result.get('category', ''),
+                        'status': result.get('status', 0),
+                        'score': result.get('score', 0),
+                        'evidence': result.get('evidence', []),
+                        'size': result.get('size', 0),
+                        'response_time': result.get('response_time', 0)
+                    })
+                    
+                # Save results to file in standard format
+                os.makedirs(os.path.dirname(result_file), exist_ok=True)
+                final_results = {
+                    'meta': {
+                        'timestamp': dt.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        'tool': 'Web Application Fuzzer',
+                        'target_url': target_url,
+                        'total_params_tested': total_params_tested,
+                        'vulnerable_params': vulnerable_params
+                    },
+                    'parameters': processed_results
+                }
+                    
+                with open(result_file, 'w') as f:
+                    json.dump(final_results, f, indent=4)
+                    
+                app.logger.info(f"Results saved to {result_file}")
+                
+                # Mark progress as complete
+                progress.complete(final_results)
+                
+            except Exception as e:
+                error_msg = f"Error during parameter fuzzing: {str(e)}"
+                app.logger.error(error_msg)
+                progress.error(error_msg)
+                
+        # Start the thread for background processing
+        threading.Thread(target=run_fuzzing).start()
+        
+        # Redirect to progress page
+        return render_template('fuzzing_progress.html', 
+                              task_id=task_id, 
+                              task_type="Parameter", 
+                              target=target_url,
+                              result_filename=os.path.basename(result_file))
     
     return render_template('parameter_fuzzing.html')
 
@@ -1176,9 +1237,9 @@ def fuzzing_progress(task_id):
         return jsonify({"error": "Task not found"}), 404
 
 if __name__ == '__main__':
-    print("Directory fuzzing enabled!") if app_config['directories']['enabled'] else None
-    print("SubDomain fuzzing enabled!") if app_config['subdomains']['enabled'] else None
-    print("API Endpoints fuzzing enabled!") if app_config['api_endpoints']['enabled'] else None
-    print("Parameter Fuzzing enabled!") if app_config.get('parameter_fuzzing', {}).get('enabled', False) else None
-    app.run(host='0.0.0.0', debug=True)
+    app.logger.info("Directory fuzzing enabled!") if app_config['directories']['enabled'] else None
+    app.logger.info("SubDomain fuzzing enabled!") if app_config['subdomains']['enabled'] else None
+    app.logger.info("API Endpoints fuzzing enabled!") if app_config['api_endpoints']['enabled'] else None
+    app.logger.info("Parameter Fuzzing enabled!") if app_config.get('parameter_fuzzing', {}).get('enabled', False) else None
+    app.run(host='0.0.0.0')
 
