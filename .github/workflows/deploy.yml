@@ -3,11 +3,17 @@ name: Deploy Web Fuzzer to EC2
 on:
   push:
     branches:
-      - main
+      - main  # Only trigger on main push
+
+permissions:
+  contents: read
+  actions: none  # Prevent this workflow from calling other GitHub Actions APIs
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    if: github.repository_owner == 'raulskat'  # Prevent workflow from running on forks
 
     steps:
       - name: Checkout code
@@ -17,6 +23,10 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.EC2_SSH_KEY }}"
 
       - name: Deploy to EC2
         run: |
